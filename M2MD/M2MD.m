@@ -89,7 +89,7 @@ styleWrapper[opts___] := Module[
 
 parseCodeData[data_] := StringReplace[
   First[FrontEndExecute[FrontEnd`ExportPacket[data, "PlainText"]]]
-, "\n" -> "\n" <> codeIndent
+, "\r\n"|"\n" -> "\n" <> codeIndent
 ];
 
 
