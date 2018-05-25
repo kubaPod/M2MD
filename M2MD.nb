@@ -17,6 +17,17 @@ Cell[BoxData[
  CellLabel->"Out[303]=",ExpressionUUID->"64dd12ac-153a-4264-a527-ea0efabfb8f7"]
 }, Open  ]],
 
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"SetDirectory", "@", 
+  RowBox[{"NotebookDirectory", "[", "]"}]}]], "Input",
+ CellLabel->"In[8]:=",ExpressionUUID->"3ce4f3fa-e724-4229-a39f-39efa810a627"],
+
+Cell[BoxData["\<\"E:\\\\Idea Projects\\\\M2MD\"\>"], "Output",
+ CellLabel->"Out[8]=",ExpressionUUID->"edae68f9-1d33-479e-b9ce-996f7e647c98"]
+}, Open  ]],
+
 Cell[BoxData[
  RowBox[{"<<", "M2MD`"}]], "Input",
  CellLabel->
@@ -32,7 +43,17 @@ Cell[BoxData[
        RowBox[{"EvaluationNotebook", "[", "]"}]}], ",", "\"\<Program\>\""}], 
      "]"}], "}"}], "\[IndentingNewLine]", "]"}], 
   "\[IndentingNewLine]"}]], "Input",
- CellLabel->"In[305]:=",ExpressionUUID->"dabb488c-d0c3-44a6-a3f4-9ac1cddbec74"]
+ CellLabel->
+  "In[305]:=",ExpressionUUID->"dabb488c-d0c3-44a6-a3f4-9ac1cddbec74"],
+
+Cell[BoxData[
+ RowBox[{"<<", "build.m"}]], "Input",
+ CellLabel->"In[11]:=",ExpressionUUID->"5ac09f12-8b81-4f73-916d-f0b2c0360f4b"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"M2MDBild", "[", "]"}], "\n"}]], "Input",
+ CellLabel->"In[13]:=",ExpressionUUID->"0209502e-5248-42db-a903-935780a4f569"]
 }, Open  ]]
 },
 WindowSize->{775, 872},
@@ -42,3 +63,4 @@ TrackCellChangeTimes->False,
 FrontEndVersion->"11.3 for Microsoft Windows (64-bit) (March 6, 2018)",
 StyleDefinitions->"Default.nb"
 ]
+
