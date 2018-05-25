@@ -6,45 +6,61 @@ BeginPackage["M2MDBuild`"];
 Needs["M2MD`"];
 
 
-  
 
-  M2MDBild;
+
+M2MDBild;
 
 Begin["`Private`"];
 
-  $project = DirectoryName[$InputFileName /. "" :> NotebookFileName[]];
-  $projectName = FileBaseName @ $project;
+$project = DirectoryName[$InputFileName /. "" :> NotebookFileName[]];
+$projectName = FileBaseName @ $project;
 
-  M2MDBild[]:= buildMainPalette[];
+M2MDBild[]:= buildMainPalette[];
 
-  needDirectory[dir_] :=  If[ DirectoryQ @ dir,dir,    CreateDirectory[dir, CreateIntermediateDirectories -> True]];
+needDirectory[dir_] :=  If[ DirectoryQ @ dir,dir,    CreateDirectory[dir, CreateIntermediateDirectories -> True]];
 
-  buildMainPalette[]:=Module[{nb, deployDir}
-    , nb = mainPalette[]
-    ; deployDir = needDirectory @ FileNameJoin[{$project, $projectName, "FrontEnd", "Palettes"}]
-    ; NotebookSave[
-      nb
+buildMainPalette[]:=Module[{nb, deployDir}
+  , nb = mainPalette[]
+  ; deployDir = needDirectory @ FileNameJoin[{$project, $projectName, "FrontEnd", "Palettes"}]
+  ; NotebookSave[
+    nb
     , FileNameJoin[{deployDir, $projectName <> ".nb"}]
-    ]
-    ; NotebookClose[nb]
   ]
+  ; NotebookClose[nb]
+]
 
-  mainPalette[]:= CreatePalette[
-    Button[
+mainPalette[]:= CreatePalette[
+  
+  DynamicModule[{processing = False}
+    , With[{
+    progressBar = ProgressIndicator[Appearance -> "Indeterminate"]
+    , button = Button[
       "Convert Notebook to Markdown"
-    , Needs["M2MD`"]
-    ; CreateDocument[
-        Cell[
-          M2MD @ InputNotebook[]
-        , "Program"
+      , processing = True
+      ; Needs["M2MD`"]
+      ; CreateDocument[ Cell[ M2MD @ InputNotebook[], "Program" ] ]
+      ; processing = False
+      , Method -> "Queued"
+      , FrameMargins -> 15
+      , ImageMargins -> 15
+    ]
+  }
+    , Pane[
+      Dynamic[
+        If[
+          TrueQ @ processing,
+          Overlay[{progressBar, Invisible@button}, All, 1, Alignment -> {Center,Center}, ImageSize ->All],
+          button
         ]
       ]
-    , Method -> "Queued"
-    , FrameMargins -> 15
-    , ImageMargins -> 15
+      , ImageSize->All
     ]
+  
+  ]
+  ]
   , WindowTitle -> $projectName
-  ];
+
+];
 
 
 
