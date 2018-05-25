@@ -6,27 +6,32 @@ BeginPackage["M2MDBuild`"];
 Needs["M2MD`"];
 
 
-  $project = DirectoryName[$InputFileName /. "" :> NotebookFileName[]];
-  $projectName = FileBaseName @ $project;
+  
 
   M2MDBild;
 
 Begin["`Private`"];
 
+  $project = DirectoryName[$InputFileName /. "" :> NotebookFileName[]];
+  $projectName = FileBaseName @ $project;
+
   M2MDBild[]:= buildMainPalette[];
 
-  buildMainPalette[]:=Module[{nb}
+  needDirectory[dir_] :=  If[ DirectoryQ @ dir,dir,    CreateDirectory[dir, CreateIntermediateDirectories -> True]];
+
+  buildMainPalette[]:=Module[{nb, deployDir}
     , nb = mainPalette[]
+    ; deployDir = needDirectory @ FileNameJoin[{$project, $projectName, "FrontEnd", "Palettes"}]
     ; NotebookSave[
       nb
-      , FileNameJoin[{$project, $projectName, "FrontEnd", "Palettes", $projectName <> ".nb"}]
+    , FileNameJoin[{deployDir, $projectName <> ".nb"}]
     ]
     ; NotebookClose[nb]
   ]
 
   mainPalette[]:= CreatePalette[
     Button[
-      "Export to Markdown"
+      "Convert Notebook to Markdown"
     , Needs["M2MD`"]
     ; CreateDocument[
         Cell[
@@ -35,7 +40,8 @@ Begin["`Private`"];
         ]
       ]
     , Method -> "Queued"
-    , ImageSize -> CurrentValue @ "DefaultButtonSize"
+    , FrameMargins -> 15
+    , ImageMargins -> 15
     ]
   , WindowTitle -> $projectName
   ];

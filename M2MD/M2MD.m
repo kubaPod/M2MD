@@ -88,7 +88,7 @@ styleWrapper[opts___] := Module[
 
 
 parseCodeData[data_] := StringReplace[
-  First[FrontEndExecute[FrontEnd`ExportPacket[data, "InputText"]]]
+  First[FrontEndExecute[FrontEnd`ExportPacket[data, "PlainText"]]]
 , "\n" -> "\n" <> codeIndent
 ];
 
@@ -132,7 +132,7 @@ M2MD[style_?itemStyleQ, data_, cellObj_CellObject] := {
 
 
 M2MD[style_?codeStyleQ, data_, cellObj_CellObject] := {
-  "\n\n----------\n\n"
+  "\n\n<!-- code break -->\n\n"
 , codeIndent
 , parseCodeData@data
 , "\n\n"

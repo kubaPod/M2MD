@@ -5,33 +5,25 @@ Cell["M2MD", "Title",ExpressionUUID->"6d30d064-6ad5-4d00-ad1b-e90016088dff"],
 
 Cell[CellGroupData[{
 
-Cell[BoxData[
+Cell[BoxData[{
  RowBox[{"PacletDirectoryAdd", " ", "@", " ", 
-  RowBox[{"NotebookDirectory", "[", "]"}]}]], "Input",
- CellLabel->
-  "In[303]:=",ExpressionUUID->"5384612b-2fdb-4dd0-896d-9c2a84aa7f4e"],
+  RowBox[{"NotebookDirectory", "[", "]"}]}], "\n", 
+ RowBox[{"SetDirectory", "@", 
+  RowBox[{"NotebookDirectory", "[", "]"}]}]}], "Input",
+ CellLabel->"In[4]:=",ExpressionUUID->"5384612b-2fdb-4dd0-896d-9c2a84aa7f4e"],
 
 Cell[BoxData[
  RowBox[{"{", "\<\"C:\\\\Users\\\\Kuba\\\\IdeaProjects\\\\M2MD\\\\\"\>", 
   "}"}]], "Output",
- CellLabel->"Out[303]=",ExpressionUUID->"64dd12ac-153a-4264-a527-ea0efabfb8f7"]
-}, Open  ]],
+ CellLabel->"Out[4]=",ExpressionUUID->"1c7f3c1a-285d-4de6-9edd-62f6120e7825"],
 
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"SetDirectory", "@", 
-  RowBox[{"NotebookDirectory", "[", "]"}]}]], "Input",
- CellLabel->"In[8]:=",ExpressionUUID->"3ce4f3fa-e724-4229-a39f-39efa810a627"],
-
-Cell[BoxData["\<\"E:\\\\Idea Projects\\\\M2MD\"\>"], "Output",
- CellLabel->"Out[8]=",ExpressionUUID->"edae68f9-1d33-479e-b9ce-996f7e647c98"]
+Cell[BoxData["\<\"C:\\\\Users\\\\Kuba\\\\IdeaProjects\\\\M2MD\"\>"], "Output",
+ CellLabel->"Out[5]=",ExpressionUUID->"7bb68b8f-398e-4f35-870a-87336ce1ef7a"]
 }, Open  ]],
 
 Cell[BoxData[
  RowBox[{"<<", "M2MD`"}]], "Input",
- CellLabel->
-  "In[304]:=",ExpressionUUID->"aeb9f136-81cb-44fa-b647-6baeefdfeb0d"],
+ CellLabel->"In[6]:=",ExpressionUUID->"aeb9f136-81cb-44fa-b647-6baeefdfeb0d"],
 
 Cell[BoxData[
  RowBox[{
@@ -46,14 +38,20 @@ Cell[BoxData[
  CellLabel->
   "In[305]:=",ExpressionUUID->"dabb488c-d0c3-44a6-a3f4-9ac1cddbec74"],
 
+Cell[CellGroupData[{
+
+Cell["build", \
+"Subsection",ExpressionUUID->"106fee2a-c44e-4872-85cf-70e13c705c5d"],
+
 Cell[BoxData[
  RowBox[{"<<", "build.m"}]], "Input",
- CellLabel->"In[11]:=",ExpressionUUID->"5ac09f12-8b81-4f73-916d-f0b2c0360f4b"],
+ CellLabel->"In[7]:=",ExpressionUUID->"5ac09f12-8b81-4f73-916d-f0b2c0360f4b"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"M2MDBild", "[", "]"}], "\n"}]], "Input",
  CellLabel->"In[13]:=",ExpressionUUID->"0209502e-5248-42db-a903-935780a4f569"]
+}, Open  ]]
 }, Open  ]]
 },
 WindowSize->{775, 872},
