@@ -45,16 +45,11 @@ mainPalette[]:= CreatePalette[
       , ImageMargins -> 15
     ]
   }
-    , Pane[
-      Dynamic[
-        If[
-          TrueQ @ processing,
-          Overlay[{progressBar, Invisible@button}, All, 1, Alignment -> {Center,Center}, ImageSize ->All],
-          button
-        ]
+    , PaneSelector[
+        {True -> progressBar, False -> button}
+      , Dynamic[processing + 0] (* XD https://mathematica.stackexchange.com/q/173940/5478*)
+      , Alignment -> {Center,Center}
       ]
-      , ImageSize->All
-    ]
   
   ]
   ]
