@@ -132,7 +132,7 @@ M2MD[style_?itemStyleQ, data_, cellObj_CellObject] := {
 
 
 M2MD[style_?codeStyleQ, data_, cellObj_CellObject] := {
-  "\n\n<!-- code break -->\n\n"
+  "\n\n[//]: <> (code break)\n\n"
 , codeIndent
 , parseCodeData@data
 , "\n\n"
