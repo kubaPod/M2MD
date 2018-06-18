@@ -23,4 +23,4 @@ and then:
     Needs @ "MPM`"    
     MPM`MPMInstall["kubapod", "m2md"]
     
-From now on there should be a MTMD item in your Palettes menu.     
+From now on there should be a M2MD item in your Palettes menu.     
