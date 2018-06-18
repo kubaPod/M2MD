@@ -2,6 +2,8 @@
 
 Simple converter of Mathematica notebooks to markdown.
 
+It originates from https://mathematica.stackexchange.com/q/84556/5478, it didn't evolve too much but I'm open to feedback as it is not something I use on daily basis.
+
 ## Installation
  
 ### Manual
