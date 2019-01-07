@@ -3,6 +3,9 @@ Notebook[{
 Cell[CellGroupData[{
 Cell["M2MD", "Title",ExpressionUUID->"6d30d064-6ad5-4d00-ad1b-e90016088dff"],
 
+Cell[BoxData["R"], \
+"Input",ExpressionUUID->"355be6b0-5810-4c40-be5f-da3bff6e4fc6"],
+
 Cell[CellGroupData[{
 
 Cell[BoxData[{
@@ -45,12 +48,26 @@ Cell["build", \
 
 Cell[BoxData[
  RowBox[{"<<", "build.m"}]], "Input",
- CellLabel->"In[7]:=",ExpressionUUID->"5ac09f12-8b81-4f73-916d-f0b2c0360f4b"],
+ CellLabel->
+  "In[136]:=",ExpressionUUID->"5ac09f12-8b81-4f73-916d-f0b2c0360f4b"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"M2MDBild", "[", "]"}], "\n"}]], "Input",
- CellLabel->"In[13]:=",ExpressionUUID->"0209502e-5248-42db-a903-935780a4f569"]
+ CellLabel->
+  "In[137]:=",ExpressionUUID->"0209502e-5248-42db-a903-935780a4f569"],
+
+Cell[BoxData[
+ RowBox[{"RebuildPacletData", "[", "]"}]], "Input",
+ CellLabel->
+  "In[138]:=",ExpressionUUID->"d68a92d6-1737-4d14-8845-aec55332345f"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"FrontEndTokenExecute", "[", 
+   RowBox[{"\"\<OpenFromPalettesMenu\>\"", ",", "\"\<M2MD.nb\>\""}], "]"}], 
+  "\n"}]], "Input",
+ CellLabel->"In[139]:=",ExpressionUUID->"e421ce63-afa1-4590-b0ba-533ad5c7bb62"]
 }, Open  ]]
 }, Open  ]]
 },
