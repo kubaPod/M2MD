@@ -2,6 +2,8 @@
 
 Simple converter of Mathematica notebooks to markdown.
 
+It originates from https://mathematica.stackexchange.com/q/84556/5478, it didn't evolve too much but I'm open to feedback as it is not something I use on daily basis.
+
 ## Installation
  
 ### Manual
@@ -20,3 +22,5 @@ and then:
    
     Needs @ "MPM`"    
     MPM`MPMInstall["kubapod", "m2md"]
+    
+From now on there should be a M2MD item in your Palettes menu.     
