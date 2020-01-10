@@ -35,6 +35,93 @@ Begin["`Private`"];
 (* Implementation code*)
 
 
+(*TODO:
+
+
+*)
+
+
+$mdExportSpec = <|
+  "codeBreak" -> "\n<!-- SE friendly -->\n\n"(*"\n[//]: <> (code break)\n\n"*) (* "\n\n<!-- SE friendly -->\n\n"*)
+  
+, "ignoredCells" -> {}
+  
+|>  
+
+
+
+(* ::Subsection:: *)
+(*M2MD*)
+
+
+M2MD // Options = {
+  
+}
+
+
+
+M2MD[nb_NotebookObject, patt: OptionsPattern[]] :=  StringJoin @ Flatten @ Map[ M2MD[#, patt]& ] @ Cells @ nb ;
+
+
+M2MD[cellObj_CellObject, patt: OptionsPattern[]] :=  M2MD[NotebookRead[cellObj], cellObj, patt];
+
+
+(*TODO: multistyle support*)
+M2MD[Cell[content_, style_, ___], cellObj_CellObject, patt:OptionsPattern[]] := M2MD[style, content, cellObj, patt];
+
+
+M2MD[style_?textStyleQ, data_, cellObj_CellObject, ___] := {
+  prefix[style]
+, addPrefix[style] /@ Flatten@{parseData[data]}
+, "\n\n"
+};
+
+
+M2MD[style_?itemStyleQ, data_, cellObj_CellObject, ___] := {
+  prefix["items"][cellObj, style]
+, parseData@data
+, "\n\n"
+};
+
+
+M2MD[style_?codeStyleQ, data_, cellObj_CellObject, ___] := {
+  "\n<!-- new code cell break -->\n"
+, codeIndent
+, parseCodeData@data
+, "\n"
+};
+
+
+M2MD["Output", BoxData[FormBox[boxes_, TraditionalForm]], cellObj_CellObject, ___] := TemplateApply["$$``$$\n\n", {boxesToTeX@boxes} ];
+
+
+M2MD["Output", data:BoxData[_?simpleOutputQ], cellObj_CellObject, OptionsPattern[]] := {
+  codeIndent, "(*", BoxesToPlainText@data, "*)\n"
+};
+
+
+simpleOutputQ = FreeQ @ Except[List|RowBox|SuperscriptBox, _Symbol]
+
+
+(*M2MD["Output", BoxData[data_?(FreeQ[])], cellObj_CellObject, OptionsPattern[]] := {
+  codeIndent, "(*", BoxesToPlainText[s], "*)\n"
+};*)
+
+
+    (*default behaviour for cell styles*)
+M2MD[s_, data_, ___] := StringTemplate["[//]: # (No rules defined for ``:``)\n\n"][s, Head @ data];
+
+
+(* ::Subsection::Closed:: *)
+(*prefixes*)
+
+
+addPrefix[style_][expr : Except[_String]] := expr;
+
+
+addPrefix[style_][s_String] :=  StringReplace[s, "\n" -> "\n" <> prefix[style]];
+
+
 itemIndent = ConstantArray[" ", 3];
 codeIndent = ConstantArray[" ", 4];
 itemMark = "+ ";
@@ -70,8 +157,12 @@ prefix[styleName_] := Switch[styleName
 , "Subsubsection", "###### "
 , "Text",          ""
 , "items",         itemPrefix
-, "code",           codeIndent
+, "code",          codeIndent
 ];
+
+
+(* ::Subsection::Closed:: *)
+(*style wrapper*)
 
 
 styleWrapper[opts___] := Module[
@@ -87,10 +178,8 @@ styleWrapper[opts___] := Module[
 ];
 
 
-parseCodeData[data_] := StringReplace[
-  First[FrontEndExecute[FrontEnd`ExportPacket[data, "PlainText"]]]
-, "\r\n"|"\n" -> "\n" <> codeIndent
-];
+(* ::Subsection::Closed:: *)
+(*cell type Q*)
 
 
 textStyleQ = (StringCount[#, "title" | "section" | "text", IgnoreCase -> True] > 0) &;
@@ -102,44 +191,8 @@ itemStyleQ = (StringCount[#, "item", IgnoreCase -> True] >  0) &;
 codeStyleQ = MemberQ[{"Code", "Input"}, #] &;
 
 
-M2MD[nb_NotebookObject] :=  StringJoin@Flatten[M2MD /@ Cells[nb]];
-
-
-M2MD[cellObj_CellObject] :=  M2MD[NotebookRead[cellObj], cellObj];
-
-
-M2MD[cell_Cell, cellObj_CellObject] := M2MD[#2, #, cellObj] & @@ cell;
-
-
-M2MD[style_?textStyleQ, data_, cellObj_CellObject] := {
-  prefix[style]
-, addPrefix[style] /@ Flatten@{parseData[data]}
-, "\n\n"
-};
-
-
-addPrefix[style_][expr : Except[_String]] := expr;
-
-
-addPrefix[style_][s_String] :=  StringReplace[s, "\n" -> "\n" <> prefix[style]];
-
-
-M2MD[style_?itemStyleQ, data_, cellObj_CellObject] := {
-  prefix["items"][cellObj, style]
-, parseData@data
-, "\n\n"
-};
-
-
-M2MD[style_?codeStyleQ, data_, cellObj_CellObject] := {
-  "\n\n[//]: <> (code break)\n\n"
-, codeIndent
-, parseCodeData@data
-, "\n\n"
-};
-
-
-M2MD["Output", BoxData[FormBox[boxes_, TraditionalForm]], cellObj_CellObject] := TemplateApply["$$``$$\n\n", {boxesToTeX@boxes} ];
+(* ::Subsection::Closed:: *)
+(*parse cell data*)
 
 
 parseData[list_List] := parseData /@ list;
@@ -173,11 +226,24 @@ parseData[ box : ButtonBox[_, ___, BaseStyle -> "Hyperlink", ___]] := Module[{la
 parseData[boxes_] := parseData@First@boxes;
 
 
-    (*default behaviour for cell styles*)
-M2MD[s_, ___] := TemplateApply["[//]: # (No rules defined for ``)\n\n", {s}];
+(* ::Subsection:: *)
+(*boxesToTeX*)
 
 
 boxesToTeX = ToString[ToExpression@#, TeXForm] &;
+
+
+(* ::Subsection:: *)
+(*parseCodeData*)
+
+
+BoxesToPlainText[ boxData_]:= First @ FrontEndExecute @ FrontEnd`ExportPacket[boxData, "PlainText"]
+
+
+parseCodeData[data_] := StringReplace[
+  BoxesToPlainText[data]
+, "\r\n"|"\n" -> "\n" <> codeIndent
+];
 
 
 (* ::Chapter:: *)
