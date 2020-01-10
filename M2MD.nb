@@ -3,23 +3,12 @@ Notebook[{
 Cell[CellGroupData[{
 Cell["M2MD", "Title",ExpressionUUID->"6d30d064-6ad5-4d00-ad1b-e90016088dff"],
 
-Cell[CellGroupData[{
-
 Cell[BoxData[{
  RowBox[{"PacletDirectoryAdd", " ", "@", " ", 
   RowBox[{"NotebookDirectory", "[", "]"}]}], "\n", 
  RowBox[{"SetDirectory", "@", 
   RowBox[{"NotebookDirectory", "[", "]"}]}]}], "Input",
  CellLabel->"In[4]:=",ExpressionUUID->"5384612b-2fdb-4dd0-896d-9c2a84aa7f4e"],
-
-Cell[BoxData[
- RowBox[{"{", "\<\"C:\\\\Users\\\\Kuba\\\\IdeaProjects\\\\M2MD\\\\\"\>", 
-  "}"}]], "Output",
- CellLabel->"Out[4]=",ExpressionUUID->"1c7f3c1a-285d-4de6-9edd-62f6120e7825"],
-
-Cell[BoxData["\<\"C:\\\\Users\\\\Kuba\\\\IdeaProjects\\\\M2MD\"\>"], "Output",
- CellLabel->"Out[5]=",ExpressionUUID->"7bb68b8f-398e-4f35-870a-87336ce1ef7a"]
-}, Open  ]],
 
 Cell[BoxData[
  RowBox[{"<<", "M2MD`"}]], "Input",
@@ -55,10 +44,10 @@ Cell[BoxData[
 }, Open  ]]
 },
 WindowSize->{775, 872},
-WindowMargins->{{1048, Automatic}, {Automatic, 217}},
+WindowMargins->{{Automatic, 57}, {33, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
-FrontEndVersion->"11.3 for Microsoft Windows (64-bit) (March 6, 2018)",
+FrontEndVersion->"12.0 for Microsoft Windows (64-bit) (April 8, 2019)",
 StyleDefinitions->"Default.nb"
 ]
 

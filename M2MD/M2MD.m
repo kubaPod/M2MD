@@ -26,6 +26,7 @@ Unprotect["`*", "`*`*"]
 ClearAll["`*", "`*`*"]
 
 M2MD::usage = "M2MD[obj] converts object to markdown string";
+MDExport::usage = "MDExport[\"path/to.md\", obj]"
 
 Begin["`Private`"];
 
@@ -33,12 +34,6 @@ Begin["`Private`"];
 
 (* ::Chapter:: *)
 (* Implementation code*)
-
-
-(*TODO:
-
-
-*)
 
 
 $mdExportSpec = <|
@@ -54,8 +49,26 @@ $mdExportSpec = <|
 (*M2MD*)
 
 
+MDExport // Options = {
+  "ImagesExportURL" -> Automatic, (*Automatic | None | path_String*)
+  "ImagesFetchURL" -> Automatic (*Automatic | "Relative" | path_String*)    
+}
+
+
+MDExport[path_String , obj_, patt : OptionsPattern[]]:= Export[
+  path
+, M2MD[obj
+  , "ImagesExportURL" -> FileNameJoin[{FileNameTake[AbsoluteFileName @ path, {-2}], "img"}]
+  , patt (*will overwrite that path if needed*)
+  ] 
+, "Text"  
+]
+
+
+
 M2MD // Options = {
-  
+  "ImagesExportURL" -> None, 
+  "ImagesFetchURL" -> Automatic
 }
 
 
@@ -100,12 +113,38 @@ M2MD["Output", data:BoxData[_?simpleOutputQ], cellObj_CellObject, OptionsPattern
 };
 
 
+M2MD["Output", data:_BoxData, cellObj_CellObject, OptionsPattern[]] := Module[{ baseName, exportDir, exportPath, fetchDir, fetchPath, res}
+, baseName = CurrentValue[cellObj, CellTags] // List // Flatten // ReplaceAll[{} :> {CreateUUID["image-"]}] // First
+
+; exportDir = Switch[ OptionValue["ImagesExportURL"]
+  , Automatic      , FileNameJoin[{Directory[], "img"}]
+  , _String | _File, OptionValue["ImagesExportURL"] /. File -> Identity
+  , None | _       , Return[{}, Module]
+  ]  
+; exportPath = FileNameJoin[{exportDir, baseName<>".png"}]
+
+; fetchDir  = Switch[ OptionValue["ImagesFetchURL"]
+  , Automatic             , exportDir
+  , "Relative"            , FileNameTake[ exportDir ] (*img/``*) 
+  , _String | _URL | _File, OptionValue["ImagesFetchURL"]
+  , _                     , Return[{}, Module]  
+  ]
+; fetchPath = urlNameJoin[{fetchDir, baseName<>".png"}]
+
+; If[ Not @ DirectoryQ @ exportDir, CreateDirectory[exportDir, CreateIntermediateDirectories->True]]
+
+; res = Export[exportPath, cellObj]
+; If[ res === $Failed, Return[ {}, Module] ]
+
+; StringTemplate["![``](``)\n"][baseName, fetchPath]
+]
+
+
 simpleOutputQ = FreeQ @ Except[List|RowBox|SuperscriptBox, _Symbol]
 
 
-(*M2MD["Output", BoxData[data_?(FreeQ[])], cellObj_CellObject, OptionsPattern[]] := {
-  codeIndent, "(*", BoxesToPlainText[s], "*)\n"
-};*)
+urlNameJoin[list_List ? (MemberQ[_URL]) ] := URLBuild[list /. URL -> Identity]
+urlNameJoin[list_List ] := FileNameJoin[ list /. File -> Identity]
 
 
     (*default behaviour for cell styles*)
