@@ -51,7 +51,7 @@ $mdExportSpec = <|
 
 MDExport // Options = {
   "ImagesExportURL" -> Automatic, (*Automatic | None | path_String*)
-  "ImagesFetchURL" -> Automatic (*Automatic | "Relative" | path_String*)    
+  "ImagesFetchURL" -> "Relative" (*Automatic | "Relative" | path_String*)    
 }
 
 
@@ -59,6 +59,7 @@ MDExport[path_String , obj_, patt : OptionsPattern[]]:= Export[
   path
 , M2MD[obj
   , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
+  , "ImagesFetchURL"  -> "Relative"
   , patt (*will overwrite that path if needed*)
   ] 
 , "Text"  
@@ -68,12 +69,19 @@ MDExport[path_String , obj_, patt : OptionsPattern[]]:= Export[
 
 M2MD // Options = {
   "ImagesExportURL" -> None, 
-  "ImagesFetchURL" -> Automatic
+  "ImagesFetchURL" -> "Relative"
 }
 
 
 
-M2MD[nb_NotebookObject, patt: OptionsPattern[]] :=  StringJoin @ Flatten @ Riffle[#, "\n\n"]& @ Map[ M2MD[#, patt]& ] @ Cells @ nb ;
+M2MD[nb_NotebookObject, patt: OptionsPattern[]] :=  ProcessMDString @ StringJoin @ Flatten @ (Riffle[#, "\n\n"]& @ Map[ M2MD[#, patt]& ] @ Cells @ nb );
+
+
+ProcessMDString[ md_String ]:= StringReplace[md, 
+  { FromCharacterCode[8232] -> "\n" (*line separator*)
+  , "```"~~ ("\n"...)~~"```\n" -> "\n" (*merge next output and input cells*)
+  }
+] 
 
 
 M2MD[cellObj_CellObject, patt: OptionsPattern[]] :=  M2MD[NotebookRead[cellObj], cellObj, patt];
@@ -96,9 +104,9 @@ M2MD[style_?itemStyleQ, data_, cellObj_CellObject, ___] := {
 
 
 M2MD[style_?codeStyleQ, data_, cellObj_CellObject, ___] := {
-  "\n<!-- new code cell break -->\n"
-, codeIndent
+  "```mathematica\n"
 , parseCodeData@data
+, "\n```"
 };
 
 
@@ -106,7 +114,7 @@ M2MD["Output", BoxData[FormBox[boxes_, TraditionalForm]], cellObj_CellObject, __
 
 
 M2MD["Output", data:BoxData[_?simpleOutputQ], cellObj_CellObject, OptionsPattern[]] := {
-  codeIndent, "(*", BoxesToPlainText@data, "*)"
+  "```\n(*", BoxesToPlainText@data, "*)\n```"
 };
 
 
@@ -122,7 +130,7 @@ M2MD["Output", data:_BoxData, cellObj_CellObject, OptionsPattern[]] := Module[{ 
 
 ; fetchDir  = Switch[ OptionValue["ImagesFetchURL"]
   , Automatic             , exportDir
-  , "Relative"            , FileNameTake[ exportDir ] (*img/``*) 
+  , "Relative"            , FileNameTake[ exportDir ] (*img/*) 
   , _String | _URL | _File, OptionValue["ImagesFetchURL"]
   , _                     , Return[{}, Module]  
   ]
@@ -148,7 +156,7 @@ urlNameJoin[list_List ] := FileNameJoin[ list /. File -> Identity]
 M2MD[s_, data_, ___] := StringTemplate["[//]: # (No rules defined for ``:``)"][s, Head @ data];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*prefixes*)
 
 
@@ -237,7 +245,7 @@ parseData[list_List] := parseData /@ list;
 parseData[string_String] := string;
 
 
-parseData[data_ (BoxData | TextData)] := List @@ (parseData /@ data);
+parseData[data:(_BoxData | _TextData)] := List @@ (parseData /@ data);
 
 
 parseData[cell_Cell] :=  parseData@First@cell; (*inline cells style skipped*)
@@ -252,13 +260,15 @@ parseData[FormBox[boxes : Except[_TagBox], TraditionalForm, ___]] :=  Module[{te
 ];
 
 
-parseData[ TemplateBox[{lbl_, {url_String, tag_}, note_}, "HyperlinkDefault", ___]] := MDElement["Hyperlink", parseData @ lbl, url]
-parseData[ TemplateBox[{lbl_, url_}, "HyperlinkURL", ___]]                          := MDElement["Hyperlink", parseData @ lbl, url]
-parseData[ bbox:ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ___]]                := MDElement["Hyperlink", parseData @ lbl, ToExpression[bbox][[2]] ]
+parseData[ TemplateBox[{lbl_String, {url_String, tag_}, note_}, "HyperlinkDefault", ___]] := MDElement["Hyperlink", parseData @ lbl, url]
+parseData[ TemplateBox[{lbl_String, url_}, "HyperlinkURL", ___]]                          := MDElement["Hyperlink", parseData @ lbl, url]
+parseData[ bbox:ButtonBox[lbl_String, ___, BaseStyle -> "Hyperlink", ___]]                := MDElement["Hyperlink", parseData @ lbl, ToExpression[bbox][[2]] ]
+
+parseData[ bbox:ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ___]]                := MDElement["Hyperlink", ToString@#, ToString@#2 ]& @@ ToExpression[bbox]
 
 
    (*default behaviour for boxes*)
-parseData[boxes_] := parseData@First@boxes;
+parseData[boxes_] := ToString @ boxes;
 
 
 (* ::Subsection:: *)
