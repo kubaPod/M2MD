@@ -3,12 +3,22 @@ Notebook[{
 Cell[CellGroupData[{
 Cell["M2MD", "Title",ExpressionUUID->"6d30d064-6ad5-4d00-ad1b-e90016088dff"],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[{
  RowBox[{"PacletDirectoryAdd", " ", "@", " ", 
   RowBox[{"NotebookDirectory", "[", "]"}]}], "\n", 
  RowBox[{"SetDirectory", "@", 
   RowBox[{"NotebookDirectory", "[", "]"}]}]}], "Input",
- CellLabel->"In[4]:=",ExpressionUUID->"5384612b-2fdb-4dd0-896d-9c2a84aa7f4e"],
+ CellLabel->"In[1]:=",ExpressionUUID->"5384612b-2fdb-4dd0-896d-9c2a84aa7f4e"],
+
+Cell[BoxData[
+ RowBox[{"{", "\<\"E:\\\\Idea Projects\\\\M2MD\\\\\"\>", "}"}]], "Output",
+ CellLabel->"Out[1]=",ExpressionUUID->"1ccf6cd2-7a1f-49e4-918e-78f33485a8a9"],
+
+Cell[BoxData["\<\"E:\\\\Idea Projects\\\\M2MD\"\>"], "Output",
+ CellLabel->"Out[2]=",ExpressionUUID->"1dcc59f4-4ee7-499c-a10d-82b42e51c084"]
+}, Open  ]],
 
 Cell[BoxData[
  RowBox[{"<<", "M2MD`"}]], "Input",

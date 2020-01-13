@@ -58,7 +58,7 @@ MDExport // Options = {
 MDExport[path_String , obj_, patt : OptionsPattern[]]:= Export[
   path
 , M2MD[obj
-  , "ImagesExportURL" -> FileNameJoin[{FileNameTake[AbsoluteFileName @ path, {-2}], "img"}]
+  , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ AbsoluteFileName @ path, "img"}]
   , patt (*will overwrite that path if needed*)
   ] 
 , "Text"  
@@ -243,7 +243,7 @@ parseData[string_String] := string;
 parseData[data_ (BoxData | TextData)] := List @@ (parseData /@ data);
 
 
-parseData[cell_Cell] :=  parseData@First@cell; (*inlince cells style skipped*)
+parseData[cell_Cell] :=  parseData@First@cell; (*inline cells style skipped*)
 
 
 parseData[StyleBox[expr_, opts___]] := styleWrapper[opts]@parseData[expr];
