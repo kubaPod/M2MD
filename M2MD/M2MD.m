@@ -58,7 +58,7 @@ MDExport // Options = {
 MDExport[path_String , obj_, patt : OptionsPattern[]]:= Export[
   path
 , M2MD[obj
-  , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ AbsoluteFileName @ path, "img"}]
+  , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
   , patt (*will overwrite that path if needed*)
   ] 
 , "Text"  
@@ -73,7 +73,7 @@ M2MD // Options = {
 
 
 
-M2MD[nb_NotebookObject, patt: OptionsPattern[]] :=  StringJoin @ Flatten @ Map[ M2MD[#, patt]& ] @ Cells @ nb ;
+M2MD[nb_NotebookObject, patt: OptionsPattern[]] :=  StringJoin @ Flatten @ Riffle[#, "\n\n"]& @ Map[ M2MD[#, patt]& ] @ Cells @ nb ;
 
 
 M2MD[cellObj_CellObject, patt: OptionsPattern[]] :=  M2MD[NotebookRead[cellObj], cellObj, patt];
@@ -86,14 +86,12 @@ M2MD[Cell[content_, style_, ___], cellObj_CellObject, patt:OptionsPattern[]] := 
 M2MD[style_?textStyleQ, data_, cellObj_CellObject, ___] := {
   prefix[style]
 , addPrefix[style] /@ Flatten@{parseData[data]}
-, "\n\n"
 };
 
 
 M2MD[style_?itemStyleQ, data_, cellObj_CellObject, ___] := {
   prefix["items"][cellObj, style]
 , parseData@data
-, "\n\n"
 };
 
 
@@ -101,15 +99,14 @@ M2MD[style_?codeStyleQ, data_, cellObj_CellObject, ___] := {
   "\n<!-- new code cell break -->\n"
 , codeIndent
 , parseCodeData@data
-, "\n"
 };
 
 
-M2MD["Output", BoxData[FormBox[boxes_, TraditionalForm]], cellObj_CellObject, ___] := TemplateApply["$$``$$\n\n", {boxesToTeX@boxes} ];
+M2MD["Output", BoxData[FormBox[boxes_, TraditionalForm]], cellObj_CellObject, ___] := TemplateApply["$$``$$", {boxesToTeX@boxes} ];
 
 
 M2MD["Output", data:BoxData[_?simpleOutputQ], cellObj_CellObject, OptionsPattern[]] := {
-  codeIndent, "(*", BoxesToPlainText@data, "*)\n"
+  codeIndent, "(*", BoxesToPlainText@data, "*)"
 };
 
 
@@ -136,7 +133,7 @@ M2MD["Output", data:_BoxData, cellObj_CellObject, OptionsPattern[]] := Module[{ 
 ; res = Export[exportPath, cellObj]
 ; If[ res === $Failed, Return[ {}, Module] ]
 
-; StringTemplate["![``](``)\n"][baseName, fetchPath]
+; StringTemplate["![``](``)"][baseName, fetchPath]
 ]
 
 
@@ -148,10 +145,10 @@ urlNameJoin[list_List ] := FileNameJoin[ list /. File -> Identity]
 
 
     (*default behaviour for cell styles*)
-M2MD[s_, data_, ___] := StringTemplate["[//]: # (No rules defined for ``:``)\n\n"][s, Head @ data];
+M2MD[s_, data_, ___] := StringTemplate["[//]: # (No rules defined for ``:``)"][s, Head @ data];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*prefixes*)
 
 
@@ -230,7 +227,7 @@ itemStyleQ = (StringCount[#, "item", IgnoreCase -> True] >  0) &;
 codeStyleQ = MemberQ[{"Code", "Input"}, #] &;
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*parse cell data*)
 
 
@@ -255,14 +252,27 @@ parseData[FormBox[boxes : Except[_TagBox], TraditionalForm, ___]] :=  Module[{te
 ];
 
 
-parseData[ box : ButtonBox[_, ___, BaseStyle -> "Hyperlink", ___]] := Module[{label, url}
-, {label, url} = {#, #2} & @@ ToExpression[box]
-;  TemplateApply["[``](``)", {StringJoin@Flatten@{parseData@label}, url}]
-];
+parseData[ TemplateBox[{lbl_, {url_String, tag_}, note_}, "HyperlinkDefault", ___]] := MDElement["Hyperlink", parseData @ lbl, url]
+parseData[ TemplateBox[{lbl_, url_}, "HyperlinkURL", ___]]                          := MDElement["Hyperlink", parseData @ lbl, url]
+parseData[ bbox:ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ___]]                := MDElement["Hyperlink", parseData @ lbl, ToExpression[bbox][[2]] ]
 
 
    (*default behaviour for boxes*)
 parseData[boxes_] := parseData@First@boxes;
+
+
+(* ::Subsection:: *)
+(*MDElement*)
+
+
+MDElement["Hyperlink", label_, url_String]:= MDElement["Hyperlink", StringJoin @ Flatten @ { label}, url];
+
+MDElement["Hyperlink", label_String, url_String]:= StringTemplate["[``](``)"][  label, url ];
+
+
+MDElement::missingRule = "Malformed MDElement! (``)";
+MDElement[args___]:=(Message[MDElement::missingRule, args];"");
+
 
 
 (* ::Subsection:: *)
