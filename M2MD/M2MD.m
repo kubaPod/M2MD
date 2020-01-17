@@ -16,6 +16,9 @@
 
 
 
+(*TODO: inline cells support*)
+
+
 (* ::Chapter:: *)
 (* Begin package*)
 
@@ -36,22 +39,14 @@ Begin["`Private`"];
 (* Implementation code*)
 
 
-$mdExportSpec = <|
-  "codeBreak" -> "\n<!-- SE friendly -->\n\n"(*"\n[//]: <> (code break)\n\n"*) (* "\n\n<!-- SE friendly -->\n\n"*)
-  
-, "ignoredCells" -> {}
-  
-|>  
-
-
-
 (* ::Subsection:: *)
-(*M2MD*)
+(*MDExport*)
 
 
 MDExport // Options = {
   "ImagesExportURL" -> Automatic, (*Automatic | None | path_String*)
-  "ImagesFetchURL" -> "Relative" (*Automatic | "Relative" | path_String*)    
+  "ImagesFetchURL" -> "Relative", (*Automatic | "Relative" | path_String*)    
+  "IgnoredStyles" -> None
 }
 
 
@@ -67,21 +62,25 @@ MDExport[path_String , obj_, patt : OptionsPattern[]]:= Export[
 
 
 
-M2MD // Options = {
-  "ImagesExportURL" -> None, 
-  "ImagesFetchURL" -> "Relative"
-}
+(* ::Subsection:: *)
+(*M2MD*)
 
 
+M2MD // Options = MDExport // Options
 
-M2MD[nb_NotebookObject, patt: OptionsPattern[]] :=  ProcessMDString @ StringJoin @ Flatten @ (Riffle[#, "\n\n"]& @ Map[ M2MD[#, patt]& ] @ Cells @ nb );
 
-
-ProcessMDString[ md_String ]:= StringReplace[md, 
-  { FromCharacterCode[8232] -> "\n" (*line separator*)
-  , "```"~~ ("\n"...)~~"```\n" -> "\n" (*merge next output and input cells*)
-  }
-] 
+M2MD[nb_NotebookObject, patt: OptionsPattern[]] :=  Module[
+  { cells, ignoredStyles = OptionValue["IgnoredStyles"] }
+, cells = Cells @ nb
+; If[ MatchQ[ignoredStyles, {__String}]
+  , cells = Complement[cells, Cells[nb, CellStyle->ignoredStyles]]
+  ]
+  
+; ProcessMDString @ 
+  StringJoin @ Map[ToString] @ Riffle[#, "\n\n"]& @ 
+  Map[ M2MD[#, patt]& ] @ 
+  cells
+]
 
 
 M2MD[cellObj_CellObject, patt: OptionsPattern[]] :=  M2MD[NotebookRead[cellObj], cellObj, patt];
@@ -91,40 +90,61 @@ M2MD[cellObj_CellObject, patt: OptionsPattern[]] :=  M2MD[NotebookRead[cellObj],
 M2MD[Cell[content_, style_, ___], cellObj_CellObject, patt:OptionsPattern[]] := M2MD[style, content, cellObj, patt];
 
 
-M2MD[style_?textStyleQ, data_, cellObj_CellObject, ___] := {
-  prefix[style]
-, addPrefix[style] /@ Flatten@{parseData[data]}
-};
+M2MD[style_, data_, cellObj_CellObject, ___] := MDElement[StyleToElement@style,  parseData[data] ]
 
 
-M2MD[style_?itemStyleQ, data_, cellObj_CellObject, ___] := {
+StyleToElement[style_]:= Switch[style
+, "Title",         "h1"
+, "Subtitle",      "h2"
+, "Subsubtitle",   "h3"
+, "Section",       "h4"
+, "Subsection",    "h5"
+, "Subsubsection", "h6"
+, _ , "Text"
+]
+
+
+(*TODO: update*)
+M2MD[style_?itemStyleQ, data_, cellObj_CellObject, ___] := StringJoin @ {
   prefix["items"][cellObj, style]
 , parseData@data
 };
 
 
-M2MD[style_?codeStyleQ, data_, cellObj_CellObject, ___] := {
-  "```mathematica\n"
-, parseCodeData@data
-, "\n```"
-};
+M2MD[style_?codeStyleQ, data_, cellObj_CellObject, ___] := MDElement["CodeBlock", parseCodeData@data];
 
 
-M2MD["Output", BoxData[FormBox[boxes_, TraditionalForm]], cellObj_CellObject, ___] := TemplateApply["$$``$$", {boxesToTeX@boxes} ];
+textStyleQ = (StringCount[#, "title" | "section" | "text", IgnoreCase -> True] > 0) &;
 
 
-M2MD["Output", data:BoxData[_?simpleOutputQ], cellObj_CellObject, OptionsPattern[]] := {
-  "```\n(*", BoxesToPlainText@data, "*)\n```"
-};
+itemStyleQ = (StringCount[#, "item", IgnoreCase -> True] >  0) &;
 
 
-M2MD["Output", data:_BoxData, cellObj_CellObject, OptionsPattern[]] := Module[{ baseName, exportDir, exportPath, fetchDir, fetchPath, res}
-, baseName = CurrentValue[cellObj, CellTags] // List // Flatten // ReplaceAll[{} :> {CreateUUID["image-"]}] // First
+codeStyleQ = MemberQ[{"Code", "Input"}, #] &;
+
+
+M2MD["Output", BoxData[FormBox[boxes_, TraditionalForm]], cellObj_CellObject, ___] := MDElement["LaTeXBlock", boxesToTeX@boxes ];
+
+
+M2MD["Output", data:BoxData[_?simpleOutputQ], cellObj_CellObject, OptionsPattern[]] := MDElement["Output", BoxesToPlainText@data]
+
+
+M2MD["Output", data:_BoxData, cellObj_CellObject, patt:OptionsPattern[]] := ToImageElement[cellObj, patt]
+
+
+ToImageElement // Options = M2MD // Options
+
+ToImageElement[source_, OptionsPattern[]]:=Module[{ baseName, exportDir, exportPath, fetchDir, fetchPath, res, fromCellQ}
+, fromCellQ = MatchQ[source, _CellObject]
+; baseName = If[ fromCellQ,
+    CurrentValue[source, CellTags] // List // Flatten // ReplaceAll[{} :> {CreateUUID["image-"]}] // First
+  , CreateUUID["image-"]
+  ]  
 
 ; exportDir = Switch[ OptionValue["ImagesExportURL"]
   , Automatic      , FileNameJoin[{Directory[], "img"}]
   , _String | _File, OptionValue["ImagesExportURL"] /. File -> Identity
-  , None | _       , Return[{}, Module]
+  , None | _       , Return["", Module]
   ]  
 ; exportPath = FileNameJoin[{exportDir, baseName<>".png"}]
 
@@ -132,16 +152,16 @@ M2MD["Output", data:_BoxData, cellObj_CellObject, OptionsPattern[]] := Module[{ 
   , Automatic             , exportDir
   , "Relative"            , FileNameTake[ exportDir ] (*img/*) 
   , _String | _URL | _File, OptionValue["ImagesFetchURL"]
-  , _                     , Return[{}, Module]  
+  , _                     , Return["", Module]  
   ]
 ; fetchPath = urlNameJoin[{fetchDir, baseName<>".png"}]
 
 ; If[ Not @ DirectoryQ @ exportDir, CreateDirectory[exportDir, CreateIntermediateDirectories->True]]
 
-; res = Export[exportPath, cellObj]
-; If[ res === $Failed, Return[ {}, Module] ]
+; res = Export[exportPath, If[fromCellQ, source, Cell@BoxData @ source]]
+; If[ res === $Failed, Return[ MDElement["Comment", "Failed to export image"], Module] ]
 
-; StringTemplate["![``](``)"][baseName, fetchPath]
+; MDElement["Image", baseName, fetchPath]
 ]
 
 
@@ -153,10 +173,10 @@ urlNameJoin[list_List ] := FileNameJoin[ list /. File -> Identity]
 
 
     (*default behaviour for cell styles*)
-M2MD[s_, data_, ___] := StringTemplate["[//]: # (No rules defined for ``:``)"][s, Head @ data];
+M2MD[s_, data_, ___] := MDElement["Comment", s, Head @ data]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*prefixes*)
 
 
@@ -193,15 +213,10 @@ itemPrefix[cellObj_, style_]:=Module[
 
 
 prefix[styleName_] := Switch[styleName
-, "Title",         "# "
-, "Subtitle",      "## "
-, "Subsubtitle",   "### "
-, "Section",       "#### "
-, "Subsection",    "##### "
-, "Subsubsection", "###### "
-, "Text",          ""
+
 , "items",         itemPrefix
 , "code",          codeIndent
+, _  , ""
 ];
 
 
@@ -222,42 +237,26 @@ styleWrapper[opts___] := Module[
 ];
 
 
-(* ::Subsection::Closed:: *)
-(*cell type Q*)
-
-
-textStyleQ = (StringCount[#, "title" | "section" | "text", IgnoreCase -> True] > 0) &;
-
-
-itemStyleQ = (StringCount[#, "item", IgnoreCase -> True] >  0) &;
-
-
-codeStyleQ = MemberQ[{"Code", "Input"}, #] &;
-
-
 (* ::Subsection:: *)
 (*parse cell data*)
 
 
-parseData[list_List] := parseData /@ list;
+parseData[list_List] := StringJoin[parseData /@ list];
 
 
 parseData[string_String] := string;
 
 
-parseData[data:(_BoxData | _TextData)] := List @@ (parseData /@ data);
-
-
 parseData[cell_Cell] :=  parseData@First@cell; (*inline cells style skipped*)
+
+
+parseData[data:(_BoxData | _TextData)] := parseData @ First @ data;
 
 
 parseData[StyleBox[expr_, opts___]] := styleWrapper[opts]@parseData[expr];
 
 
-parseData[FormBox[boxes : Except[_TagBox], TraditionalForm, ___]] :=  Module[{teXForm}
-, teXForm = boxesToTeX@boxes
-; "$" <> teXForm <> "$"
-];
+parseData[FormBox[boxes : Except[_TagBox], TraditionalForm, ___]] :=  MDElement["LaTeXInline", boxesToTeX@boxes]
 
 
 parseData[ TemplateBox[{lbl_String, {url_String, tag_}, note_}, "HyperlinkDefault", ___]] := MDElement["Hyperlink", parseData @ lbl, url]
@@ -266,23 +265,50 @@ parseData[ bbox:ButtonBox[lbl_String, ___, BaseStyle -> "Hyperlink", ___]]      
 
 parseData[ bbox:ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ___]]                := MDElement["Hyperlink", ToString@#, ToString@#2 ]& @@ ToExpression[bbox]
 
+parseData[ ButtonBox[lbl_, ___, ButtonData -> (s_String ? (StringStartsQ["paclet:"])), ___] ]:=
+  MDElement["Hyperlink", parseData @ lbl, "https://reference.wolfram.com/language/" <> StringTrim[s, "paclet:"]]
+
+
+parseData[ graphics:(_GraphicsBox| _GraphicsBox3D) ]:=ToImageElement[graphics]
+
 
    (*default behaviour for boxes*)
-parseData[boxes_] := ToString @ boxes;
+parseData[boxes_] := ToImageElement[boxes];
 
 
 (* ::Subsection:: *)
 (*MDElement*)
 
 
-MDElement["Hyperlink", label_, url_String]:= MDElement["Hyperlink", StringJoin @ Flatten @ { label}, url];
+MDElement::missingRule = "Malformed MDElement! (``, ``)";
 
-MDElement["Hyperlink", label_String, url_String]:= StringTemplate["[``](``)"][  label, url ];
+MDElement[tag_, args___]:= Module[{template} 
+, template = Lookup[$MDElementTemplates, tag, Message[MDElement::missingRule, tag, args]; Return["", Module]]
+; template // Replace[ s_String :> StringTemplate[s] ]
+; TemplateApply[template, {args}]
+] 
+  
 
 
-MDElement::missingRule = "Malformed MDElement! (``)";
-MDElement[args___]:=(Message[MDElement::missingRule, args];"");
+$MDElementTemplates = <|
+  "LaTeXBlock" -> "$$``$$"
+, "LaTeXInline"-> "$``$"  
+, "Image"      -> "![``](``)"
+, "Hyperlink"  -> "[``](``)"
+, "Text"       -> "``"
 
+, "h1" -> "# <*StringReplace[#, \"\n\"->\"<br>\"]*>"
+, "h2" -> "## <*StringReplace[#, \"\n\"->\"<br>\"]*>"
+, "h3" -> "### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
+, "h4" -> "#### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
+, "h5" -> "##### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
+, "h6" -> "###### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
+
+, "Comment"   -> "[//]: # (``)"
+, "CodeBlock" -> TemplateExpression @ StringJoin["```mathematica\n", TemplateSlot[1], "\n```"]   
+, "Output"    -> TemplateExpression @ StringJoin["```\n(*", TemplateSlot[1], "*)\n```"]
+
+|>
 
 
 (* ::Subsection:: *)
@@ -303,6 +329,26 @@ parseCodeData[data_] := StringReplace[
   BoxesToPlainText[data]
 , "\r\n"|"\n" -> "\n" <> codeIndent
 ];
+
+
+(* ::Subsection::Closed:: *)
+(*ProcessMDString*)
+
+
+ProcessMDString[ md_String ]:= StringReplace[md, 
+  { FromCharacterCode[8232] -> "\n" (*line separator*)
+  , "```"~~ ("\n"...)~~"```\n" -> "\n" (*merge next output and input cells*)
+  , "\[Rule]" -> "->"
+  , "\[RuleDelayed]" -> ":>"
+  , "\[LessEqual]" -> "<="
+  , "\[GreaterEqual]" -> ">="
+  , "\[NotEqual]" -> "!="
+  , "\[Equal]" -> "=="
+  , "\[InlinePart]" -> "@>"
+  , "\[TwoWayRule]" -> "<->"
+  , "\[LongRightArrow]" -> "-->"
+  }
+] 
 
 
 (* ::Chapter:: *)
