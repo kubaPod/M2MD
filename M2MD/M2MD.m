@@ -58,7 +58,7 @@ MDExport[path_String , obj_, patt : OptionsPattern[]]:= Export[
   , "ImagesFetchURL"  -> "Relative"
   , patt (*will overwrite that path if needed*)
   ] 
-, "Text"  
+, "Text"
 ]
 
 
@@ -77,11 +77,14 @@ M2MD[nb_NotebookObject, patt: OptionsPattern[]] :=  Module[
   , cells = Complement[cells, Cells[nb, CellStyle->ignoredStyles]]
   ]
   
-; ProcessMDString @ 
-  StringJoin @ Map[ToString] @ Riffle[#, "\n\n"]& @ 
+; ProcessMDString @
+  CombineMDCells  @ 
   Map[ M2MD[#, patt]& ] @ 
   cells
 ]
+
+
+CombineMDCells = StringJoin @ Map[ToString] @ Riffle[#, "\n\n"]& 
 
 
 M2MD[cellObj_CellObject, patt: OptionsPattern[]] :=  M2MD[NotebookRead[cellObj], cellObj, patt];
@@ -96,11 +99,11 @@ M2MD[style_, data_, cellObj_CellObject, ___] := MDElement[StyleToElement@style, 
 
 StyleToElement[style_]:= Switch[style
 , "Title",         "h1"
-, "Subtitle",      "h2"
-, "Subsubtitle",   "h3"
-, "Section",       "h4"
-, "Subsection",    "h5"
-, "Subsubsection", "h6"
+, "Subtitle",      "Bold"
+, "Subsubtitle",   "Bold"
+, "Section",       "h2"
+, "Subsection",    "h3"
+, "Subsubsection", "h4"
 , _ , "Text"
 ]
 
@@ -127,10 +130,18 @@ codeStyleQ = MemberQ[{"Code", "Input"}, #] &;
 M2MD["Output", BoxData[FormBox[boxes_, TraditionalForm]], cellObj_CellObject, ___] := MDElement["LaTeXBlock", boxesToTeX@boxes ];
 
 
-M2MD["Output", data:BoxData[_?simpleOutputQ], cellObj_CellObject, OptionsPattern[]] := MDElement["Output", BoxesToPlainText@data]
+M2MD["Output", data:BoxData[_?simpleOutputQ], cellObj_CellObject, OptionsPattern[]] := MDElement["Output", BoxesToString @ data]
 
 
 M2MD["Output", data:_BoxData, cellObj_CellObject, patt:OptionsPattern[]] := ToImageElement[cellObj, patt]
+
+
+    (*default behaviour for cell styles*)
+M2MD[s_, data_, ___] := MDElement["Comment", s, Head @ data]
+
+
+(* ::Subsection::Closed:: *)
+(*ToImageElement*)
 
 
 ToImageElement // Options = M2MD // Options
@@ -192,10 +203,6 @@ FirstCellTag[{}]:={};
 FirstCellTag[{tag_String, ___}]:=tag;
 
 
-    (*default behaviour for cell styles*)
-M2MD[s_, data_, ___] := MDElement["Comment", s, Head @ data]
-
-
 (* ::Subsection:: *)
 (*prefixes*)
 
@@ -244,16 +251,16 @@ prefix[styleName_] := Switch[styleName
 (*style wrapper*)
 
 
-styleWrapper[opts___] := Module[
+ToStyleElementFunction[opts___] := Module[
   {italic, bold, wrapper }
-, italic = MemberQ[{opts}, Verbatim[Rule][FontSlant, "Italic"]]
-; bold = MemberQ[{opts}, Verbatim[Rule][FontWeight, "Bold"]]
-; wrapper = Which[
-    bold, "**"
-  , italic, "*"
-  , True, ""
-  ]
-; wrapper <> # <> wrapper &
+
+, bold = MemberQ[{opts}, Verbatim[Rule][FontWeight, "Bold"]]
+; If[ bold, Return @ MDElement["Bold", # ]& ]
+
+; italic = MemberQ[{opts}, Verbatim[Rule][FontSlant, "Italic"]]
+; If[ italic, Return @ MDElement["Italic", # ]&]
+
+; Identity
 ];
 
 
@@ -273,7 +280,7 @@ parseData[cell_Cell] :=  parseData@First@cell; (*inline cells style skipped*)
 parseData[data:(_BoxData | _TextData)] := parseData @ First @ data;
 
 
-parseData[StyleBox[expr_, opts___]] := styleWrapper[opts]@parseData[expr];
+parseData[StyleBox[expr_, opts___]] := ToStyleElementFunction[opts] @ parseData[expr];
 
 
 parseData[FormBox[boxes : Except[_TagBox], TraditionalForm, ___]] :=  MDElement["LaTeXInline", boxesToTeX@boxes]
@@ -316,6 +323,8 @@ $MDElementTemplates = <|
 , "Image"      -> "![``](``)"
 , "Hyperlink"  -> "[``](``)"
 , "Text"       -> "``"
+, "Bold"       -> "**``**"
+, "Italic"     -> "*``*"
 
 , "h1" -> "# <*StringReplace[#, \"\n\"->\"<br>\"]*>"
 , "h2" -> "## <*StringReplace[#, \"\n\"->\"<br>\"]*>"
@@ -342,7 +351,7 @@ boxesToTeX = ToString[ToExpression@#, TeXForm] &;
 (*parseCodeData*)
 
 
-BoxesToString[ boxData_]:= BoxesToString[boxData, "InputText"]
+BoxesToString[ boxData_]:= BoxesToString[boxData, "PlainText"]
 BoxesToString[ boxData_, type_]:= First @ FrontEndExecute @ FrontEnd`ExportPacket[boxData, type]
 
 
@@ -360,7 +369,7 @@ ProcessMDString[ md_String ]:= StringReplace[md,
   { 
     FromCharacterCode[8232] -> "\n"     (*line separator*)
   , "```"~~ ("\n"...)~~"```\n" -> "\n" (*merge next output and input cells*)
-  
+
     (*TODO: restrict it to pre v12.1 and maybe only include it in BoxesToString?*)
   , "\\[Rule]"           -> "->"
   , "\\[RuleDelayed]"    -> ":>"
