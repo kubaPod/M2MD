@@ -46,7 +46,8 @@ Begin["`Private`"];
 MDExport // Options = {
   "ImagesExportURL" -> Automatic, (*Automatic | None | path_String*)
   "ImagesFetchURL" -> "Relative", (*Automatic | "Relative" | path_String*)    
-  "IgnoredStyles" -> None
+  "IgnoredStyles" -> None,
+  "ImageNameFunction" -> Automatic
 }
 
 
@@ -134,12 +135,11 @@ M2MD["Output", data:_BoxData, cellObj_CellObject, patt:OptionsPattern[]] := ToIm
 
 ToImageElement // Options = M2MD // Options
 
-ToImageElement[source_, OptionsPattern[]]:=Module[{ baseName, exportDir, exportPath, fetchDir, fetchPath, res, fromCellQ}
+ToImageElement[source_, patt : OptionsPattern[]]:=Module[{ baseName, exportDir, exportPath, fetchDir, fetchPath, res, fromCellQ}
+
 , fromCellQ = MatchQ[source, _CellObject]
-; baseName = If[ fromCellQ,
-    CurrentValue[source, CellTags] // List // Flatten // ReplaceAll[{} :> {CreateUUID["image-"]}] // First
-  , CreateUUID["image-"]
-  ]  
+
+; baseName = ToImageName[source, patt]
 
 ; exportDir = Switch[ OptionValue["ImagesExportURL"]
   , Automatic      , FileNameJoin[{Directory[], "img"}]
@@ -170,6 +170,26 @@ simpleOutputQ = FreeQ @ Except[List|RowBox|SuperscriptBox, _Symbol]
 
 urlNameJoin[list_List ? (MemberQ[_URL]) ] := URLBuild[list /. URL -> Identity]
 urlNameJoin[list_List ] := FileNameJoin[ list /. File -> Identity]
+
+
+ToImageName // Options = Options @ MDExport;
+
+ToImageName[source_, OptionsPattern[] ]:= ToImageName[source, OptionValue["ImageNameFunction"]]
+
+ToImageName[source_        , Automatic]:= ToImageName[source, "ExpressionHash"]
+ToImageName[cell_CellObject, Automatic]:= FirstCellTag @ cell // Replace[{} :> ToImageName[cell, "ExpressionHash"] ]
+ToImageName[source_        , foo_]     := foo @ source // Replace[Except[_String] :> ToImageName[source, "ExpressionHash"] ]
+
+(*TODO: can we avoid reading it twice? export to png probably re-does it*)
+ToImageName[cell_CellObject, "ExpressionHash"]:= Hash[First @ NotebookRead @ cell, "Expression", "Base36String"]
+ToImageName[source_, "ExpressionHash"]        := Hash[source, "Expression", "Base36String"]
+
+
+
+FirstCellTag[cell_CellObject]:= FirstCellTag @ CurrentValue[EvaluationCell[], CellTags]
+FirstCellTag[tag_String]:=tag;
+FirstCellTag[{}]:={};
+FirstCellTag[{tag_String, ___}]:=tag;
 
 
     (*default behaviour for cell styles*)
