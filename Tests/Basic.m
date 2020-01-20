@@ -14,14 +14,3 @@ VerificationTest[
 , "0bleddx8vw5yk"
 , TestID -> "ToImageName basic"
 ]
-
-
-VerificationTest[
-  ToImageName @ PreviousCell @ PreviousCell[]
-, "06u9zuleucwll"
-, TestID -> "ToImageName cell obj default"
-]
-
-
-SetOptions[PreviousCell@PreviousCell[], CellTags -> {"test-tag"}];
-ToImageName @ PreviousCell @ PreviousCell[]

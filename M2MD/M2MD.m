@@ -257,7 +257,7 @@ styleWrapper[opts___] := Module[
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*parse cell data*)
 
 
@@ -342,31 +342,35 @@ boxesToTeX = ToString[ToExpression@#, TeXForm] &;
 (*parseCodeData*)
 
 
-BoxesToPlainText[ boxData_]:= First @ FrontEndExecute @ FrontEnd`ExportPacket[boxData, "PlainText"]
+BoxesToString[ boxData_]:= BoxesToString[boxData, "InputText"]
+BoxesToString[ boxData_, type_]:= First @ FrontEndExecute @ FrontEnd`ExportPacket[boxData, type]
 
 
 parseCodeData[data_] := StringReplace[
-  BoxesToPlainText[data]
+  BoxesToString[data]
 , "\r\n"|"\n" -> "\n" <> codeIndent
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*ProcessMDString*)
 
 
 ProcessMDString[ md_String ]:= StringReplace[md, 
-  { FromCharacterCode[8232] -> "\n" (*line separator*)
+  { 
+    FromCharacterCode[8232] -> "\n"     (*line separator*)
   , "```"~~ ("\n"...)~~"```\n" -> "\n" (*merge next output and input cells*)
-  , "\[Rule]" -> "->"
-  , "\[RuleDelayed]" -> ":>"
-  , "\[LessEqual]" -> "<="
-  , "\[GreaterEqual]" -> ">="
-  , "\[NotEqual]" -> "!="
-  , "\[Equal]" -> "=="
-  , "\[InlinePart]" -> "@>"
-  , "\[TwoWayRule]" -> "<->"
-  , "\[LongRightArrow]" -> "-->"
+  
+    (*TODO: restrict it to pre v12.1 and maybe only include it in BoxesToString?*)
+  , "\\[Rule]"           -> "->"
+  , "\\[RuleDelayed]"    -> ":>"
+  , "\\[LessEqual]"      -> "<="
+  , "\\[GreaterEqual]"   -> ">="
+  , "\\[NotEqual]"       -> "!="
+  , "\\[Equal]"          -> "=="
+  , "\\[InlinePart]"     -> "@>"
+  , "\\[TwoWayRule]"     -> "<->"
+  , "\\[LongRightArrow]" -> "-->"
   }
 ] 
 
