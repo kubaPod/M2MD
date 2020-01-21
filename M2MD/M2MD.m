@@ -47,7 +47,9 @@ MDExport // Options = {
   "ImagesExportURL" -> Automatic, (*Automatic | None | path_String*)
   "ImagesFetchURL" -> "Relative", (*Automatic | "Relative" | path_String*)    
   "IgnoredStyles" -> None,
-  "ImageNameFunction" -> Automatic
+  "ImageNameFunction" -> Automatic,
+  "OverwriteImages" -> True, (*boole*)
+  "MDElementTemplates" -> Automatic (* _String | template_ *)
 }
 
 
@@ -61,10 +63,33 @@ MDExport[path_String , obj_, patt : OptionsPattern[]]:= Export[
 , "Text"
 ]
 
+MDEnvironment // Options = Options @ MDExport;
+
+MDEnvironment[___, OptionsPattern[] ]:= Function[
+  expr
+, Internal`InheritedBlock[
+    { MDElement, $MDMonitor = PrintTemporary }
+  , MDElementInit @ Association @ OptionValue @ "MDElementTemplates"
+  ; expr
+  ]
+, HoldAll
+
+]
 
 
 (* ::Subsection:: *)
 (*M2MD*)
+
+M2MD // Attributes = {HoldAllComplete};
+
+M2MD[args___] /; Not @ TrueQ @ $MDEnvironment := Internal`InheritedBlock[
+  {$MDEnvironment = True, M2MD}
+, Attributes[M2MD] = {}
+; Update[M2MD]
+; MDEnvironment[args] @ M2MD[args]
+]
+
+
 
 
 M2MD // Options = MDExport // Options
@@ -118,8 +143,6 @@ M2MD[style_?itemStyleQ, data_, cellObj_CellObject, ___] := StringJoin @ {
 M2MD[style_?codeStyleQ, data_, cellObj_CellObject, ___] := MDElement["CodeBlock", parseCodeData@data];
 
 
-textStyleQ = (StringCount[#, "title" | "section" | "text", IgnoreCase -> True] > 0) &;
-
 
 itemStyleQ = (StringCount[#, "item", IgnoreCase -> True] >  0) &;
 
@@ -137,7 +160,7 @@ M2MD["Output", data:_BoxData, cellObj_CellObject, patt:OptionsPattern[]] := ToIm
 
 
     (*default behaviour for cell styles*)
-M2MD[s_, data_, ___] := MDElement["Comment", s, Head @ data]
+M2MD[s_, data___] := MDElement["Comment", s, Head @ data]
 
 
 (* ::Subsection::Closed:: *)
@@ -146,11 +169,13 @@ M2MD[s_, data_, ___] := MDElement["Comment", s, Head @ data]
 
 ToImageElement // Options = M2MD // Options
 
-ToImageElement[source_, patt : OptionsPattern[]]:=Module[{ baseName, exportDir, exportPath, fetchDir, fetchPath, res, fromCellQ}
+ToImageElement[source_, patt : OptionsPattern[]]:=Module[{ baseName, exportDir, exportPath, fetchDir, fetchPath, res, fromCellQ, overwriteQ}
 
 , fromCellQ = MatchQ[source, _CellObject]
+; overwriteQ = OptionValue["OverwriteImages"]
 
 ; baseName = ToImageName[source, patt]
+
 
 ; exportDir = Switch[ OptionValue["ImagesExportURL"]
   , Automatic      , FileNameJoin[{Directory[], "img"}]
@@ -160,12 +185,17 @@ ToImageElement[source_, patt : OptionsPattern[]]:=Module[{ baseName, exportDir, 
 ; exportPath = FileNameJoin[{exportDir, baseName<>".png"}]
 
 ; fetchDir  = Switch[ OptionValue["ImagesFetchURL"]
-  , Automatic             , exportDir
-  , "Relative"            , FileNameTake[ exportDir ] (*img/*) 
-  , _String | _URL | _File, OptionValue["ImagesFetchURL"]
-  , _                     , Return["", Module]  
+, Automatic             , exportDir
+, "Relative"            , FileNameTake[ exportDir ] (*img/*)
+, _String | _URL | _File, OptionValue["ImagesFetchURL"]
+, _                     , Return["", Module]
   ]
 ; fetchPath = urlNameJoin[{fetchDir, baseName<>".png"}]
+
+; If[overwriteQ && FileExistsQ[exportPath]
+  , $MDMonitor["Skipping ", baseName]; Return[MDElement["Image", baseName, fetchPath], Module]
+  ]
+
 
 ; If[ Not @ DirectoryQ @ exportDir, CreateDirectory[exportDir, CreateIntermediateDirectories->True]]
 
@@ -306,38 +336,48 @@ parseData[boxes_] := ToImageElement[boxes];
 (* ::Subsection:: *)
 (*MDElement*)
 
+$MDElementTemplates = <|
+    "LaTeXBlock" -> "$$``$$"
+  , "LaTeXInline"-> "$``$"
+  , "Image"      -> "![``](``)"
+  , "Hyperlink"  -> "[``](``)"
+  , "Text"       -> "``"
+  , "Bold"       -> "**``**"
+  , "Italic"     -> "*``*"
 
-MDElement::missingRule = "Malformed MDElement! (``, ``)";
+  , "h1" -> "# <*StringReplace[#, \"\n\"->\"<br>\"]*>"
+  , "h2" -> "## <*StringReplace[#, \"\n\"->\"<br>\"]*>"
+  , "h3" -> "### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
+  , "h4" -> "#### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
+  , "h5" -> "##### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
+  , "h6" -> "###### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
 
-MDElement[tag_, args___]:= Module[{template} 
-, template = Lookup[$MDElementTemplates, tag, Message[MDElement::missingRule, tag, args]; Return["", Module]]
-; template // Replace[ s_String :> StringTemplate[s] ]
-; TemplateApply[template, {args}]
-] 
+  , "Comment"   -> "[//]: # (``)"
+  , "CodeBlock" -> TemplateExpression @ StringJoin["```mathematica\n", TemplateSlot[1], "\n```"]
+  , "Output"    -> TemplateExpression @ StringJoin["```\n(*", TemplateSlot[1], "*)\n```"]
+
+|>;
+
+
+MDElement::unknownTag = "Unknown MDElement tag: ``.";
+
+MDElement[args___]:= ( Message[MDElement::unknownTag, args]; "");
+
+
+MDElementInit[ r : KeyValuePattern[{}] ]:= KeyValueMap[MDElementInit, r];
+
+MDElementInit[ tag_String, template_String]:= MDElementInit[tag, StringTemplate @ template];
+
+MDElementInit[ tag_String, template_]:= (MDElement[tag, args__]:=TemplateApply[template, {args}] )
+
+MDElementInit[Automatic]:={};
+
+
+MDElementInit @ $MDElementTemplates;
+
   
 
 
-$MDElementTemplates = <|
-  "LaTeXBlock" -> "$$``$$"
-, "LaTeXInline"-> "$``$"  
-, "Image"      -> "![``](``)"
-, "Hyperlink"  -> "[``](``)"
-, "Text"       -> "``"
-, "Bold"       -> "**``**"
-, "Italic"     -> "*``*"
-
-, "h1" -> "# <*StringReplace[#, \"\n\"->\"<br>\"]*>"
-, "h2" -> "## <*StringReplace[#, \"\n\"->\"<br>\"]*>"
-, "h3" -> "### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
-, "h4" -> "#### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
-, "h5" -> "##### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
-, "h6" -> "###### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
-
-, "Comment"   -> "[//]: # (``)"
-, "CodeBlock" -> TemplateExpression @ StringJoin["```mathematica\n", TemplateSlot[1], "\n```"]   
-, "Output"    -> TemplateExpression @ StringJoin["```\n(*", TemplateSlot[1], "*)\n```"]
-
-|>
 
 
 (* ::Subsection:: *)

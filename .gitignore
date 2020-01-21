@@ -1,4 +1,5 @@
 .idea/*
+*.iml
 *.paclet
 */FrontEnd/*/*.nb
 
