@@ -1,3 +1,5 @@
+Consider it beta before it hits 1.0.0. It is undergoing major upgrades, as far as the time is found, in 2020 so let me know if anything is off. Before I write documentation release logs are shedding some light on syntax/options: https://github.com/kubaPod/M2MD/releases
+
 # M2MD
 
 Simple converter of Mathematica notebooks to markdown.
