@@ -12,7 +12,7 @@ It originates from https://mathematica.stackexchange.com/q/84556/5478, it didn't
 
 ### Quick
 
-   ResourceFunction["GitHubInstall"][ "kubapod", "m2md" ]
+    ResourceFunction["GitHubInstall"][ "kubapod", "m2md" ]
  
 ### Manual
  
