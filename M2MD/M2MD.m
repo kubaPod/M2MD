@@ -116,11 +116,16 @@ CombineMDCells = StringJoin @ Map[ToString] @ Riffle[#, "\n\n"]&
 M2MD[cellObj_CellObject, patt: OptionsPattern[]] :=  M2MD[NotebookRead[cellObj], cellObj, patt];
 
 
-(*TODO: multistyle support*)
-M2MD[Cell[content_, style_, ___], cellObj_CellObject, patt:OptionsPattern[]] := M2MD[style, content, cellObj, patt];
+M2MD[ Cell[content_, style_, ___], src : _CellObject : Missing[], patt:OptionsPattern[]] := M2MD[style, content, src, patt];
 
 
-M2MD[style_, data_, cellObj_CellObject, ___] := MDElement[StyleToElement@style,  parseData[data] ]
+M2MD[style_, data_, cellObj:_CellObject:Missing[], ___] := Module[{spec = StyleToElement[style] }
+, If[
+    StringQ @ spec
+  , MDElement[spec,  parseData[data] ]
+  , MDElement[spec[[1]], spec[[2]] @ data]
+  ]
+]
 
 
 StyleToElement[style_]:= Switch[style
@@ -132,6 +137,7 @@ StyleToElement[style_]:= Switch[style
 , "Subsubsection", "h4"
 , "Subsubsubsection", "h5"
 , "Subsubsubsubsection", "h6"
+, "Code" | "Input", {"CodeBlock", parseCodeData}
 , _ , "Text"
 ]
 
@@ -143,17 +149,10 @@ M2MD[style_?itemStyleQ, data_, cellObj_CellObject, ___] := StringJoin @ {
 };
 
 
-M2MD[style_?codeStyleQ, data_, cellObj_CellObject, ___] := MDElement["CodeBlock", parseCodeData@data];
-
-
-
 itemStyleQ = (StringCount[#, "item", IgnoreCase -> True] >  0) &;
 
 
-codeStyleQ = MemberQ[{"Code", "Input"}, #] &;
-
-
-M2MD["Output", BoxData[FormBox[boxes_, TraditionalForm]], cellObj_CellObject, ___] := MDElement["LaTeXBlock", boxesToTeX@boxes ];
+M2MD["Output", BoxData[FormBox[boxes_, TraditionalForm]], cellObj_CellObject, ___] := MDElement["LaTeXBlock", BoxesToTeX@boxes ];
 
 
 M2MD["Output", data:BoxData[_?simpleOutputQ], cellObj_CellObject, OptionsPattern[]] := MDElement["Output", BoxesToString @ data]
@@ -239,7 +238,7 @@ FirstCellTag[{}]:={};
 FirstCellTag[{tag_String, ___}]:=tag;
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*prefixes*)
 
 
@@ -300,7 +299,7 @@ ToStyleElementFunction[opts___] := Module[
 ];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*parse cell data*)
 
 
@@ -313,13 +312,19 @@ parseData[string_String] := string;
 parseData[cell_Cell] :=  parseData@First@cell; (*inline cells style skipped*)
 
 
+parseData[Cell[boxes_BoxData, ___]]:=MDElement["CodeInline", BoxesToString @  boxes]
+
+
+parseData[ Cell[BoxData[FormBox[boxes_, TraditionalForm]], ___] ]:= MDElement["LaTeXInline", BoxesToTeX @ boxes]
+
+
 parseData[data:(_BoxData | _TextData)] := parseData @ First @ data;
 
 
 parseData[StyleBox[expr_, opts___]] := ToStyleElementFunction[opts] @ parseData[expr];
 
 
-parseData[FormBox[boxes : Except[_TagBox], TraditionalForm, ___]] :=  MDElement["LaTeXInline", boxesToTeX@boxes]
+parseData[FormBox[boxes : Except[_TagBox], TraditionalForm, ___]] :=  MDElement["LaTeXInline", BoxesToTeX@boxes]
 
 
 parseData[ TemplateBox[{lbl_String, {url_String, tag_}, note_}, "HyperlinkDefault", ___]] := MDElement["Hyperlink", parseData @ lbl, url]
@@ -339,7 +344,7 @@ parseData[ graphics:(_GraphicsBox| _GraphicsBox3D) ]:=ToImageElement[graphics]
 parseData[boxes_] := ToImageElement[boxes];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*MDElement*)
 
 
@@ -361,6 +366,7 @@ $MDElementTemplates = <|
 
   , "Comment"   -> "[//]: # (``)"
   , "CodeBlock" -> TemplateExpression @ StringJoin["```mathematica\n", TemplateSlot[1], "\n```"]
+  , "CodeInline" -> TemplateExpression @ StringJoin["``", TemplateSlot[1], "``"]
   , "Output"    -> TemplateExpression @ StringJoin["```\n(*", TemplateSlot[1], "*)\n```"]
 
 |>;
@@ -388,14 +394,10 @@ MDElementInit @ $MDElementTemplates;
 
 
 (* ::Subsection:: *)
-(*boxesToTeX*)
+(*BoxToString*)
 
 
-boxesToTeX = ToString[ToExpression@#, TeXForm] &;
-
-
-(* ::Subsection:: *)
-(*parseCodeData*)
+BoxesToTeX[boxes_] := ToString[ DisplayForm[boxes], TeXForm];
 
 
 BoxesToString[ boxData_]:= BoxesToString[boxData, "PlainText"]
