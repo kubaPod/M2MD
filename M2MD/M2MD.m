@@ -158,7 +158,7 @@ M2MD["Output", BoxData[FormBox[boxes_, TraditionalForm]], cellObj_CellObject, __
 M2MD["Output", data:BoxData[_?simpleOutputQ], cellObj_CellObject, OptionsPattern[]] := MDElement["Output", BoxesToString @ data]
 
 
-M2MD["Output", data:_BoxData, cellObj_CellObject, patt:OptionsPattern[]] := ToImageElement[cellObj, patt]
+M2MD["Output", data:_BoxData, cellObj_CellObject, patt:OptionsPattern[]] := ToImageElement[cellObj, data, patt]
 
 
     (*default behaviour for cell styles*)
@@ -174,13 +174,12 @@ M2MD[box_]:= parseData[box];
 
 ToImageElement // Options = M2MD // Options
 
-ToImageElement[source_, patt : OptionsPattern[]]:=Module[{ baseName, exportDir, exportPath, fetchDir, fetchPath, res, fromCellQ, overwriteQ}
+ToImageElement[cellObj_:False, boxes_,  patt : OptionsPattern[]]:=Module[{ baseName, exportDir, exportPath, fetchDir, fetchPath, res, fromCellQ, overwriteQ}
 
-, fromCellQ = MatchQ[source, _CellObject]
+, fromCellQ = MatchQ[cellObj, _CellObject]
 ; overwriteQ = OptionValue["OverwriteImages"]
 
-; baseName = ToImageName[source, patt]
-
+; baseName = ToImageName[cellObj, boxes, patt]
 
 ; exportDir = Switch[ OptionValue["ImagesExportURL"]
   , Automatic      , FileNameJoin[{Directory[], "img"}]
@@ -220,16 +219,18 @@ urlNameJoin[list_List ] := FileNameJoin[ list /. File -> Identity]
 
 ToImageName // Options = Options @ MDExport;
 
-ToImageName[source_, OptionsPattern[] ]:= ToImageName[source, OptionValue["ImageNameFunction"]]
+ToImageName[cellObj_:False, boxes_, OptionsPattern[] ]:= ToImageName[cellObj, boxes, OptionValue["ImageNameFunction"]]
 
-ToImageName[source_        , Automatic]:= ToImageName[source, "ExpressionHash"]
-ToImageName[cell_CellObject, Automatic]:= FirstCellTag @ cell // Replace[{} :> ToImageName[cell, "ExpressionHash"] ]
-ToImageName[source_        , foo_]     := foo @ source // Replace[Except[_String] :> ToImageName[source, "ExpressionHash"] ]
+ToImageName[_, boxes_              , Automatic]:= ToImageName[boxes, "ExpressionHash"]
+ToImageName[cell_CellObject, boxes_, Automatic]:= FirstCellTag @ cell // Replace[{} :> ToImageName[boxes, "ExpressionHash"] ]
+ToImageName[cell_, boxes_          , foo_]     := foo[cell, boxes] // Replace[Except[_String] :> ToImageName[boxes, "ExpressionHash"] ]
 
-(*TODO: can we avoid reading it twice? export to png probably re-does it*)
+
+
+ToImageName[boxes_, "ExpressionHash"]        := Hash[boxes, "Expression", "Base36String"]
+
+
 ToImageName[cell_CellObject, "ExpressionHash"]:= Hash[First @ NotebookRead @ cell, "Expression", "Base36String"]
-ToImageName[source_, "ExpressionHash"]        := Hash[source, "Expression", "Base36String"]
-
 
 
 FirstCellTag[cell_CellObject]:= FirstCellTag @ CurrentValue[EvaluationCell[], CellTags]

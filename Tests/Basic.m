@@ -34,3 +34,20 @@ VerificationTest[
 , "### test $1+1$"
 , TestID -> "LaTeXInline"
 ]
+
+
+VerificationTest[
+  Block[{ToImageElement, MDElement,StringJoin},
+ToString @ M2MD @ Cell[TextData[{
+ "test ",
+ Cell[BoxData[
+  FormBox[
+   GraphicsBox[DiskBox[{0, 0}],
+    ImageSize->20], TraditionalForm]],
+  FormatType->"TraditionalForm"]
+}], "Section"]
+
+]
+, "MDElement[h2, StringJoin[{test , ToImageElement[GraphicsBox[DiskBox[{0, 0}], ImageSize -> 20]]}]]"
+, TestID -> "Inline image"
+]
