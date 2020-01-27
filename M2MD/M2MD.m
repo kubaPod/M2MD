@@ -203,7 +203,7 @@ ToImageElement[cellObj_:False, boxes_,  patt : OptionsPattern[]]:=Module[{ baseN
 
 ; If[ Not @ DirectoryQ @ exportDir, CreateDirectory[exportDir, CreateIntermediateDirectories->True]]
 
-; res = Export[exportPath, If[fromCellQ, source, Cell@BoxData @ source]]
+; res = Export[exportPath, If[fromCellQ, cellObj, Cell@BoxData @ boxes]]
 ; If[ res === $Failed, Return[ MDElement["Comment", "Failed to export image"], Module] ]
 
 ; MDElement["Image", baseName, fetchPath]
