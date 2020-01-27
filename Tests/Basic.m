@@ -51,3 +51,22 @@ ToString @ M2MD @ Cell[TextData[{
 , "MDElement[h2, StringJoin[{test , ToImageElement[GraphicsBox[DiskBox[{0, 0}], ImageSize -> 20]]}]]"
 , TestID -> "Inline image"
 ]
+
+
+VerificationTest[
+  ToImageName @ RowBox[{}]
+, "10tvi4mw3rg8l"
+, TestID -> "ToImageName[boxes]"
+]
+
+
+VerificationTest[
+  Block[{ToImageElement, MDElement,StringJoin},
+ToString@M2MD@Cell[TextData[{
+ Cell[BoxData[  GraphicsBox[{    Disk[{0,0}]    }   ]]  ],
+ " IGraph/M"
+}], "Title"]
+]
+, "MDElement[h1, StringJoin[{ToImageElement[GraphicsBox[{Disk[{0, 0}]}]],  IGraph/M}]]"
+, TestID -> "Inline image in std form"
+]

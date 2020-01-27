@@ -68,7 +68,7 @@ MDEnvironment // Options = Options @ MDExport;
 MDEnvironment[___, OptionsPattern[] ]:= Function[
   expr
 , Internal`InheritedBlock[
-    { MDElement, $MDMonitor = PrintTemporary }
+    { MDElement, $MDMonitor = Hold }
   , MDElementInit @ Association @ OptionValue @ "MDElementTemplates"
   ; expr
   ]
@@ -219,18 +219,15 @@ urlNameJoin[list_List ] := FileNameJoin[ list /. File -> Identity]
 
 ToImageName // Options = Options @ MDExport;
 
+ToImageName[boxes_, "ExpressionHash"]        := Hash[boxes, "Expression", "Base36String"]
+ToImageName[cell_CellObject, "ExpressionHash"]:= Hash[First @ NotebookRead @ cell, "Expression", "Base36String"]
+
 ToImageName[cellObj_:False, boxes_, OptionsPattern[] ]:= ToImageName[cellObj, boxes, OptionValue["ImageNameFunction"]]
 
 ToImageName[_, boxes_              , Automatic]:= ToImageName[boxes, "ExpressionHash"]
 ToImageName[cell_CellObject, boxes_, Automatic]:= FirstCellTag @ cell // Replace[{} :> ToImageName[boxes, "ExpressionHash"] ]
 ToImageName[cell_, boxes_          , foo_]     := foo[cell, boxes] // Replace[Except[_String] :> ToImageName[boxes, "ExpressionHash"] ]
 
-
-
-ToImageName[boxes_, "ExpressionHash"]        := Hash[boxes, "Expression", "Base36String"]
-
-
-ToImageName[cell_CellObject, "ExpressionHash"]:= Hash[First @ NotebookRead @ cell, "Expression", "Base36String"]
 
 
 FirstCellTag[cell_CellObject]:= FirstCellTag @ CurrentValue[EvaluationCell[], CellTags]
@@ -312,16 +309,10 @@ parseData[string_String] := string;
 
 parseData[cell_Cell] :=  parseData@First@cell; (*inline cells style skipped*)
 
+parseData[ Cell[BoxData[boxes_?inlineImageQ], ___] ]:= ToImageElement[boxes]
+inlineImageQ = Not @* FreeQ[GraphicsBox | Graphics3DBox | DynamicModuleBox ]
 
 parseData[Cell[boxes_BoxData, ___]]:=MDElement["CodeInline", BoxesToString @  boxes]
-
-
-parseData[ Cell[BoxData[FormBox[boxes_?inlineImageQ, TraditionalForm]], ___] ]:= ToImageElement[boxes]
-
-
-inlineImageQ = Not @* FreeQ[GraphicsBox | GraphicsBox3D | DynamicModuleBox ]
-
-
 parseData[ Cell[BoxData[FormBox[boxes_, TraditionalForm]], ___] ]:= MDElement["LaTeXInline", BoxesToTeX @ boxes]
 
 
@@ -404,7 +395,10 @@ MDElementInit @ $MDElementTemplates;
 (*BoxToString*)
 
 
-BoxesToTeX[boxes_] := ToString[ DisplayForm[boxes], TeXForm];
+BoxesToTeX[boxes_] := Check[
+  ToString[ DisplayForm[boxes], TeXForm],
+  $MDMonitor["Exporting as image instead"];  ToImageElement@boxes
+]
 
 
 BoxesToString[ boxData_]:= BoxesToString[boxData, "PlainText"]
