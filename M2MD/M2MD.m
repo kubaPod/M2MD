@@ -80,6 +80,7 @@ MDEnvironment[___, OptionsPattern[] ]:= Function[
 (* ::Subsection:: *)
 (*M2MD*)
 
+
 M2MD // Attributes = {HoldAllComplete};
 
 M2MD[args___] /; Not @ TrueQ @ $MDEnvironment := Internal`InheritedBlock[
@@ -129,6 +130,8 @@ StyleToElement[style_]:= Switch[style
 , "Section",       "h2"
 , "Subsection",    "h3"
 , "Subsubsection", "h4"
+, "Subsubsubsection", "h5"
+, "Subsubsubsubsection", "h6"
 , _ , "Text"
 ]
 
@@ -160,7 +163,10 @@ M2MD["Output", data:_BoxData, cellObj_CellObject, patt:OptionsPattern[]] := ToIm
 
 
     (*default behaviour for cell styles*)
-M2MD[s_, data___] := MDElement["Comment", s, Head @ data]
+M2MD[s_, data___] := MDElement["Comment", s, Head @ data];
+
+M2MD[box_]:= parseData[box];
+
 
 
 (* ::Subsection::Closed:: *)
@@ -335,6 +341,7 @@ parseData[boxes_] := ToImageElement[boxes];
 
 (* ::Subsection:: *)
 (*MDElement*)
+
 
 $MDElementTemplates = <|
     "LaTeXBlock" -> "$$``$$"
