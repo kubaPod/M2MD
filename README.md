@@ -1,3 +1,7 @@
+Consider it beta before it hits 1.0.0. It is undergoing major upgrades, as far as the time is found, in 2020 so let me know if anything is off. 
+
+For quick **documentation** see: https://github.com/kubaPod/M2MD/wiki
+
 # M2MD
 
 Simple converter of Mathematica notebooks to markdown.
@@ -5,6 +9,10 @@ Simple converter of Mathematica notebooks to markdown.
 It originates from https://mathematica.stackexchange.com/q/84556/5478, it didn't evolve too much but I'm open to feedback as it is not something I use on daily basis.
 
 ## Installation
+
+### Quick
+
+    ResourceFunction["GitHubInstall"][ "kubapod", "m2md" ]
  
 ### Manual
  
