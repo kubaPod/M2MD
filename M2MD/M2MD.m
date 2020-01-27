@@ -168,7 +168,7 @@ M2MD[box_]:= parseData[box];
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*ToImageElement*)
 
 
@@ -198,7 +198,7 @@ ToImageElement[source_, patt : OptionsPattern[]]:=Module[{ baseName, exportDir, 
 ; fetchPath = urlNameJoin[{fetchDir, baseName<>".png"}]
 
 ; If[overwriteQ && FileExistsQ[exportPath]
-  , $MDMonitor["Skipping ", baseName]; Return[MDElement["Image", baseName, fetchPath], Module]
+  , $MDMonitor["Skipping existing image:", baseName]; Return[MDElement["Image", baseName, fetchPath], Module]
   ]
 
 
@@ -315,6 +315,12 @@ parseData[cell_Cell] :=  parseData@First@cell; (*inline cells style skipped*)
 parseData[Cell[boxes_BoxData, ___]]:=MDElement["CodeInline", BoxesToString @  boxes]
 
 
+parseData[ Cell[BoxData[FormBox[boxes_?inlineImageQ, TraditionalForm]], ___] ]:= ToImageElement[boxes]
+
+
+inlineImageQ = Not @* FreeQ[GraphicsBox | GraphicsBox3D | DynamicModuleBox ]
+
+
 parseData[ Cell[BoxData[FormBox[boxes_, TraditionalForm]], ___] ]:= MDElement["LaTeXInline", BoxesToTeX @ boxes]
 
 
@@ -344,7 +350,7 @@ parseData[ graphics:(_GraphicsBox| _GraphicsBox3D) ]:=ToImageElement[graphics]
 parseData[boxes_] := ToImageElement[boxes];
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*MDElement*)
 
 
@@ -366,7 +372,7 @@ $MDElementTemplates = <|
 
   , "Comment"   -> "[//]: # (``)"
   , "CodeBlock" -> TemplateExpression @ StringJoin["```mathematica\n", TemplateSlot[1], "\n```"]
-  , "CodeInline" -> TemplateExpression @ StringJoin["``", TemplateSlot[1], "``"]
+  , "CodeInline" -> TemplateExpression @ StringJoin["`", TemplateSlot[1], "`"]
   , "Output"    -> TemplateExpression @ StringJoin["```\n(*", TemplateSlot[1], "*)\n```"]
 
 |>;

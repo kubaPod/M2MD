@@ -6,11 +6,31 @@
 (* :Date: 2020-01-20 *)
 
 
-AppendTo[$ContextPath, "M2MD`Private`"]
+Needs @ "M2MD`";
+Once @ AppendTo[$ContextPath, "M2MD`Private`"]
 
 
 VerificationTest[
   ToImageName @ "test"
 , "0bleddx8vw5yk"
 , TestID -> "ToImageName basic"
+]
+
+
+VerificationTest[
+  M2MD @ Cell[TextData[{
+ "Use ",
+ Cell[BoxData[  RowBox[{"Print", "[",   RowBox[{"1", "+", "1"}], "]"}]]], " to print stuff."}], "Text"]
+, "Use `Print[1+1]` to print stuff."
+, TestID -> "CodeInline"
+]
+
+
+VerificationTest[
+  M2MD @ Cell[TextData[{
+ "test ",
+ Cell[BoxData[  FormBox[   RowBox[{"1", "+", "1"}], TraditionalForm]],  FormatType->"TraditionalForm"]
+}], "Subsection"]
+, "### test $1+1$"
+, TestID -> "LaTeXInline"
 ]
