@@ -371,7 +371,7 @@ $MDElementTemplates = <|
   , "h6" -> "###### <*StringReplace[#, \"\n\"->\"<br>\"]*>"
 
   , "Comment"   -> "[//]: # (``)"
-  , "CodeBlock" -> TemplateExpression @ StringJoin["```mathematica\n", TemplateSlot[1], "\n```"]
+  , "CodeBlock" -> TemplateExpression @ StringJoin["```\n", TemplateSlot[1], "\n```"]
   , "CodeInline" -> TemplateExpression @ StringJoin["`", TemplateSlot[1], "`"]
   , "Output"    -> TemplateExpression @ StringJoin["```\n(*", TemplateSlot[1], "*)\n```"]
 
