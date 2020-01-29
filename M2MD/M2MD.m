@@ -69,7 +69,7 @@ MDEnvironment[___, OptionsPattern[] ]:= Function[
   expr
 , Internal`InheritedBlock[
     { MDElement, $MDMonitor = Hold }
-  , MDElementInit @ Association @ OptionValue @ "MDElementTemplates"
+  , MDElementLoad @ OptionValue @ "MDElementTemplates"
   ; expr
   ]
 , HoldAll
@@ -168,36 +168,44 @@ M2MD[box_]:= parseData[box];
 
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*ToImageElement*)
 
 
 ToImageElement // Options = M2MD // Options
 
-ToImageElement[cellObj_:False, boxes_,  patt : OptionsPattern[]]:=Module[{ baseName, exportDir, exportPath, fetchDir, fetchPath, res, fromCellQ, overwriteQ}
+ToImageElement[cellObj_:False, boxes_,  patt : OptionsPattern[]]:=
+  With[
+  { overwriteQ = OptionValue["OverwriteImages"]
+  , exportURL  = OptionValue["ImagesExportURL"]
+  , fetchURL   = OptionValue["ImagesFetchURL"]
+  }
+, Module[{ baseName, exportDir, exportPath, fetchDir, fetchPath, res, fromCellQ}
 
 , fromCellQ = MatchQ[cellObj, _CellObject]
-; overwriteQ = OptionValue["OverwriteImages"]
+
 
 ; baseName = ToImageName[cellObj, boxes, patt]
 
-; exportDir = Switch[ OptionValue["ImagesExportURL"]
+; exportDir = Switch[ exportURL
   , Automatic      , FileNameJoin[{Directory[], "img"}]
-  , _String | _File, OptionValue["ImagesExportURL"] /. File -> Identity
+  , _String | _File, exportURL /. File -> Identity
   , None | _       , Return["", Module]
   ]  
 ; exportPath = FileNameJoin[{exportDir, baseName<>".png"}]
 
-; fetchDir  = Switch[ OptionValue["ImagesFetchURL"]
-, Automatic             , exportDir
-, "Relative"            , FileNameTake[ exportDir ] (*img/*)
-, _String | _URL | _File, OptionValue["ImagesFetchURL"]
-, _                     , Return["", Module]
+; fetchDir  = Switch[ fetchURL
+  , Automatic             , exportDir
+  , "Relative"            , FileNameTake @ exportDir  (*img/*)
+  , _String | _URL | _File, fetchURL
+  , _                     , Return["", Module]
   ]
 ; fetchPath = urlNameJoin[{fetchDir, baseName<>".png"}]
 
-; If[overwriteQ && FileExistsQ[exportPath]
-  , $MDMonitor["Skipping existing image:", baseName]; Return[MDElement["Image", baseName, fetchPath], Module]
+; If[
+    overwriteQ && FileExistsQ[exportPath]
+  , $MDMonitor["Skipping existing image:", baseName]
+  ; Return[MDElement["Image", baseName, fetchPath], Module]
   ]
 
 
@@ -207,7 +215,7 @@ ToImageElement[cellObj_:False, boxes_,  patt : OptionsPattern[]]:=Module[{ baseN
 ; If[ res === $Failed, Return[ MDElement["Comment", "Failed to export image"], Module] ]
 
 ; MDElement["Image", baseName, fetchPath]
-]
+]]
 
 
 simpleOutputQ = FreeQ @ Except[List|RowBox|SuperscriptBox, _Symbol]
@@ -297,7 +305,7 @@ ToStyleElementFunction[opts___] := Module[
 ];
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*parse cell data*)
 
 
@@ -375,20 +383,52 @@ MDElement::unknownTag = "Unknown MDElement tag: ``.";
 MDElement[args___]:= ( Message[MDElement::unknownTag, args]; "");
 
 
-MDElementInit[ r : KeyValuePattern[{}] ]:= KeyValueMap[MDElementInit, r];
+
+
+
+LoadDefinitions // Options = {
+  "StandardizationFunction" -> Identity,
+  "DefinitionFunction" -> Hold
+};
+
+LoadDefinitions[ definitions : KeyValuePattern[{}], OptionsPattern[] ]:= With[
+  { standardize = OptionValue["StandardizationFunction"] 
+  , define = OptionValue["DefinitionFunction"]  
+  }
+, Module[{std}  
+  , std = standardize /@ Normal @ definitions
+  ; std = ToDownValue /@ std
+  ; std /. RuleDelayed[ _[rhs_], lhs_] :> define[rhs, lhs]  
+  ]
+]
+
+ToDownValue[ rule_[ rhs:Except[_HoldPattern] , lhs_] ] := HoldPattern[rhs] :> lhs;
+ToDownValue[ r_Rule ] := RuleDelayed @@ r
+
+
+MDElementDefine[tag_String , lhs_String]:= MDElement[tag, args__]:= StringTemplate[lhs][args]
+MDElementDefine[tag_String , lhs_]      := MDElement[tag, args__]:= TemplateApply[lhs, {args}]
+
+MDElementLoad[defs_]:=LoadDefinitions[   defs, "DefinitionFunction" -> MDElementDefine ] 
+
+
+MDElementLoad @ $MDElementTemplates
+
+
+(*MDElementInit[ r : KeyValuePattern[{}] ]:= KeyValueMap[MDElementInit, r];
 
 MDElementInit[ tag_String, template_String]:= MDElementInit[tag, StringTemplate @ template];
 
 MDElementInit[ tag_String, template_]:= (MDElement[tag, args__]:=TemplateApply[template, {args}] )
 
-MDElementInit[Automatic]:={};
+MDElementInit[Automatic]:={};*)
 
 
-MDElementInit @ $MDElementTemplates;
+(*MDElementInit @ $MDElementTemplates;
 
   
 
-
+*)
 
 
 (* ::Subsection:: *)
@@ -407,7 +447,7 @@ BoxesToString[ boxData_, type_]:= First @ FrontEndExecute @ FrontEnd`ExportPacke
 
 parseCodeData[data_] := StringReplace[
   BoxesToString[data]
-, "\r\n"|"\n" -> "\n" <> codeIndent
+, "\r\n"|"\n" -> "\n"
 ];
 
 
