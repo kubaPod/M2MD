@@ -3,26 +3,27 @@ Notebook[{
 Cell[CellGroupData[{
 Cell["M2MD", "Title",ExpressionUUID->"6d30d064-6ad5-4d00-ad1b-e90016088dff"],
 
-Cell[CellGroupData[{
-
 Cell[BoxData[{
  RowBox[{"PacletDirectoryAdd", " ", "@", " ", 
   RowBox[{"NotebookDirectory", "[", "]"}]}], "\n", 
  RowBox[{"SetDirectory", "@", 
   RowBox[{"NotebookDirectory", "[", "]"}]}]}], "Input",
- CellLabel->"In[1]:=",ExpressionUUID->"5384612b-2fdb-4dd0-896d-9c2a84aa7f4e"],
-
-Cell[BoxData[
- RowBox[{"{", "\<\"E:\\\\Idea Projects\\\\M2MD\\\\\"\>", "}"}]], "Output",
- CellLabel->"Out[1]=",ExpressionUUID->"cc1ae82d-4169-459c-bb5d-106ada4bed46"],
-
-Cell[BoxData["\<\"E:\\\\Idea Projects\\\\M2MD\"\>"], "Output",
- CellLabel->"Out[2]=",ExpressionUUID->"5e1a3934-86e5-437d-a829-b6aee05dd03f"]
-}, Open  ]],
+ CellLabel->
+  "In[133]:=",ExpressionUUID->"5384612b-2fdb-4dd0-896d-9c2a84aa7f4e"],
 
 Cell[BoxData[
  RowBox[{"<<", "M2MD`"}]], "Input",
- CellLabel->"In[6]:=",ExpressionUUID->"aeb9f136-81cb-44fa-b647-6baeefdfeb0d"],
+ CellLabel->
+  "In[169]:=",ExpressionUUID->"aeb9f136-81cb-44fa-b647-6baeefdfeb0d"],
+
+Cell[BoxData[{"1", "\[IndentingNewLine]", "1", "\[IndentingNewLine]", 
+ RowBox[{"foo", "[", "\[IndentingNewLine]", "  ", "2", "\[IndentingNewLine]", 
+  "]"}]}], "Code",ExpressionUUID->"0af976ca-4a90-481f-828c-4dd5dc5320ca"],
+
+Cell[BoxData[
+ RowBox[{"M2MD", "@", 
+  RowBox[{"PreviousCell", "[", "]"}]}]], "Input",
+ CellLabel->"In[26]:=",ExpressionUUID->"c9aa2163-47ce-41da-8230-208068809444"],
 
 Cell[BoxData[
  RowBox[{
@@ -46,22 +47,47 @@ Cell[BoxData[
  RowBox[{"<<", "build.m"}]], "Input",
  CellLabel->"In[7]:=",ExpressionUUID->"5ac09f12-8b81-4f73-916d-f0b2c0360f4b"],
 
-Cell[CellGroupData[{
-
 Cell[BoxData[
  RowBox[{"PreviousCell", "[", "]"}]], "Input",
  CellLabel->"In[37]:=",ExpressionUUID->"abfe85b0-5012-404f-85cc-97d95d6924f5"],
 
 Cell[BoxData[
- TemplateBox[{99985, "99985", "\"Output\""},
-  "CellObject"]], "Output",
- CellLabel->"Out[37]=",ExpressionUUID->"56ecef9f-3f2a-4e6b-a2f6-6ded521ec741"]
-}, Open  ]]
+ RowBox[{"SetDirectory", "@", "$TemporaryDirectory"}]], "Input",
+ CellLabel->
+  "In[120]:=",ExpressionUUID->"92e6ee82-80c3-472c-87a3-4f585b0f016a"],
+
+Cell[BoxData[
+ RowBox[{"MDExport", "[", 
+  RowBox[{"\"\<test.md\>\"", ",", 
+   RowBox[{
+    RowBox[{"Notebooks", "[", "]"}], "[", 
+    RowBox[{"[", "2", "]"}], "]"}]}], "]"}]], "Input",
+ CellLabel->
+  "In[170]:=",ExpressionUUID->"025f7c36-8f61-4289-819d-b87d43162bb0"],
+
+Cell[BoxData[
+ RowBox[{"SystemOpen", "@", "%"}]], "Input",
+ CellLabel->
+  "In[171]:=",ExpressionUUID->"e33cf853-1695-46b7-8632-2c3284124825"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Notebooks", "[", "]"}], "[", 
+  RowBox[{"[", "2", "]"}], "]"}]], "Input",
+ CellLabel->
+  "In[150]:=",ExpressionUUID->"71e89637-89d5-43c2-a335-281fa7a21993"],
+
+Cell[BoxData["\[DoubleLongRightArrow]"], \
+"Input",ExpressionUUID->"c77ab8b5-685e-43c7-8c4e-41ab702e6a78"],
+
+Cell[BoxData[
+ RowBox[{"\[AliasDelimiter]", 
+  "=="}]], "Input",ExpressionUUID->"b305fb4c-f813-49ef-a8ac-59e275324289"]
 }, Open  ]]
 }, Open  ]]
 },
 WindowSize->{776, 872},
-WindowMargins->{{Automatic, 57}, {33, Automatic}},
+WindowMargins->{{-1214, Automatic}, {-209, Automatic}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
 FrontEndVersion->"12.1 for Microsoft Windows (64-bit) (January 6, 2020)",
