@@ -162,12 +162,14 @@ M2MD[ cell : Cell[_, style_, ___], opt : OptionsPattern[] ] := M2MD[style, cell,
 ]
    (*etc*)
 
+M2MD[ "SlideShowNavigationBar", ___]:= MDElement["ThematicBreak"]
+
 M2MD[ style_?InputStyleQ    , cell:_[_?InputFormQ, ___], opts: OptionsPattern[]]:= MDElement["CodeBlock", BoxesToInputString @ cell ]
 M2MD[ style_?NumberedStyleQ , cell_, opts: OptionsPattern[]]:= MDElement["NumberedItem", ItemLevel[style], BoxesToMDString[cell, False, opts] ]
 M2MD[ style_?ParagraphStyleQ, cell_, opts: OptionsPattern[]]:= MDElement["Paragraph"   , ItemLevel[style], BoxesToMDString[cell, False, opts] ]
 M2MD[ style_?ItemStyleQ     , cell_, opts: OptionsPattern[]]:= MDElement["Item"        , ItemLevel[style], BoxesToMDString[cell, False, opts] ]
 
-M2MD[ "SlideShowNavigationBar", ___]:= MDElement["ThematicBreak"]
+
 
 InputStyleQ     = MemberQ[{"Input","Code","Program", "ExternalLanguage"}, #]& (*TODO, language*)
 NumberedStyleQ  = StringContainsQ["itemNumbered", IgnoreCase -> True]
@@ -410,12 +412,12 @@ ToDownValue[ rule_[ rhs:Except[_HoldPattern] , lhs_] ] := HoldPattern[rhs] :> lh
 ToDownValue[ r_Rule ] := RuleDelayed @@ r
 
 
-MDElementDefine[tag_String , lhs_String]:= MDElement[tag, args__]:= Block[
+MDElementDefine[tag_String , lhs_String]:= MDElement[tag, args___]:= Block[
   { WithLineBreaks = StringReplace[#, "\n" -> "  \n"]& }
 , StringTemplate[lhs][args]
 ]
 
-MDElementDefine[tag_String , lhs_]      := MDElement[tag, args__]:= Block[
+MDElementDefine[tag_String , lhs_]      := MDElement[tag, args___]:= Block[
   { WithLineBreaks = StringReplace[#, "\n" -> "  \n"]& }
 , TemplateApply[lhs, {args}]
 ]
@@ -426,7 +428,7 @@ MDElementLoad[defs_]:=LoadDefinitions[   defs, "DefinitionFunction" -> MDElement
 MDElementLoad @ $MDElementTemplates
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*ProcessMDString*)
 
 
