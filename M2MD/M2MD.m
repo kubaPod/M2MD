@@ -169,13 +169,17 @@ ItemLevel = StringCount[#, "sub", IgnoreCase -> True]&
 
 
 (*content rules*)
-M2MD[style_, cell:_[_TextData|_String, ___], opt : OptionsPattern[]] := MDElement["Text", BoxesToMDString[ cell, False, opt ] ]
+M2MD[style_, cell:_[_TextData|_String, ___], opt : OptionsPattern[]
+] := MDElement["Text", BoxesToMDString[ cell, False, opt ] ]
 
-M2MD[style_, cell:_[_?OutputFormQ, ___],  OptionsPattern[] ]:= MDElement["Output", BoxesToInputString @ cell ]
+M2MD[style_, cell:_[_?OutputFormQ, ___],  OptionsPattern[]
+]:= MDElement["Output", BoxesToInputString @ cell ]
 
-M2MD[style_, cell:_[BoxData @ FormBox[_, TraditionalForm], ___], OptionsPattern[]] := MDElement["LaTeXBlock", BoxesToTeXString @ cell ];
+M2MD[style_, cell:_[BoxData @ FormBox[_, TraditionalForm], ___], OptionsPattern[]
+] := MDElement["LaTeXBlock", BoxesToTeXString @ cell ];
 
-M2MD[style_, cell:_[_BoxData, ___], opt : OptionsPattern[]] := ToImageElement[cell, opt]
+M2MD[style_, cell:_[_BoxData, ___], opt : OptionsPattern[]
+] := ToImageElement[cell, opt]
 
 (*default behaviour for cell styles*)
 M2MD[args___] := MDElement["Comment", ToString[ Head /@ {args}] ];
@@ -293,24 +297,25 @@ ToStyleElementFunction[opts___] := Module[
 (* ::Subsection::Closed:: *)
 (*parse cell data*)
 
-
+parseData[ cell_Cell ]:= parseData @ First @ cell
+parseData[TextData[boxes_]]:= parseData @ boxes
 parseData[list_List] := StringJoin[parseData /@ list];
-
 
 parseData[string_String] := string;
 
-
-parseData[cell_Cell] :=  parseData@First@cell; (*inline cells style skipped*)
-
+(*all cells below are inline cells*)
 parseData[ Cell[BoxData[boxes_?inlineImageQ], ___] ]:= ToImageElement[boxes]
-
 inlineImageQ = Not @* FreeQ[GraphicsBox | Graphics3DBox | DynamicModuleBox ]
 
-parseData[Cell[boxes_BoxData, ___]]:=MDElement["CodeInline", BoxesToInputString @  boxes]
+
+parseData[ Cell[BoxData[boxes_?InputFormQ], ___]]:=MDElement["CodeInline", BoxesToInputString @  boxes]
+
 parseData[ Cell[BoxData[FormBox[boxes_, TraditionalForm]], ___] ]:= MDElement["LaTeXInline", BoxesToTeXString @ boxes]
 
 
-parseData[data:(_BoxData | _TextData)] := parseData @ First @ data;
+
+
+parseData[ Cell[BoxData[boxes_], ___] ] := parseData @ boxes (*TODO: with box replacements*)
 
 
 parseData[StyleBox[expr_, opts___]] := ToStyleElementFunction[opts] @ parseData[expr];
@@ -319,17 +324,26 @@ parseData[StyleBox[expr_, opts___]] := ToStyleElementFunction[opts] @ parseData[
 parseData[FormBox[boxes : Except[_TagBox], TraditionalForm, ___]] :=  MDElement["LaTeXInline", BoxesToTeXString@boxes]
 
 
-parseData[ TemplateBox[{lbl_String, {url_String, tag_}, note_}, "HyperlinkDefault", ___]] := MDElement["Hyperlink", parseData @ lbl, url]
-parseData[ TemplateBox[{lbl_String, url_}, "HyperlinkURL", ___]]                          := MDElement["Hyperlink", parseData @ lbl, url]
-parseData[ bbox:ButtonBox[lbl_String, ___, BaseStyle -> "Hyperlink", ___]]                := MDElement["Hyperlink", parseData @ lbl, ToExpression[bbox][[2]] ]
+parseData[ TemplateBox[{lbl_String, {url_String, tag_}, note_}, "HyperlinkDefault", ___]
+] := MDElement["Hyperlink", parseData @ lbl, url]
 
-parseData[ bbox:ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ___]]                := MDElement["Hyperlink", ToString@#, ToString@#2 ]& @@ ToExpression[bbox]
+parseData[ TemplateBox[{lbl_String, url_}, "HyperlinkURL", ___]
+] := MDElement["Hyperlink", parseData @ lbl, url]
+
+parseData[ bbox:ButtonBox[lbl_String, ___, BaseStyle -> "Hyperlink", ___]
+] := MDElement["Hyperlink", parseData @ lbl, ToExpression[bbox][[2]] ]
+
+parseData[ bbox:ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ___]
+] := MDElement["Hyperlink", ToString@#, ToString@#2 ]& @@ ToExpression[bbox]
 
 parseData[ ButtonBox[lbl_, ___, ButtonData -> (s_String ? (StringStartsQ["paclet:"])), ___] ]:=
   MDElement["Hyperlink", parseData @ lbl, "https://reference.wolfram.com/language/" <> StringTrim[s, "paclet:"]]
 
+parseData[ TemplateBox[{lbl_, ref_String}, "RefLink"|"RefLinkPlain", ___]
+]:= MDElement["Hyperlink", parseData @ lbl, "https://reference.wolfram.com/language/" <> StringTrim[ref, "paclet:"]]
 
-parseData[ graphics:(_GraphicsBox| _GraphicsBox3D) ]:=ToImageElement[graphics]
+
+(*parseData[ graphics:(_GraphicsBox| _GraphicsBox3D) ]:=ToImageElement[graphics]*)
 
 
    (*default behaviour for boxes*)

@@ -103,14 +103,14 @@ VerificationTest[  M2MD @ "string", "string", TestID -> "String"]
 
 VerificationTest[
   M2MD @ Cell["1+\n2", "Program"]
-, "```\n1+\n2\n```"
+, "```wl\n1+\n2\n```"
 , TestID -> "Program cell"
 ]
 
 
 VerificationTest[
   M2MD @ Cell[BoxData[ RowBox[{"<<", "M2MD`"}]], "Input"]
-, "```\n<<M2MD`\n```"
+, "```wl\n<<M2MD`\n```"
 , TestID -> "InputBlock"
 ]
 
@@ -150,7 +150,7 @@ Import@"img\1wm4d46lfhvv2.png"
 (* CellChangeTimes->{{3.789380678711265*^9, 3.789380685243788*^9}}]*)
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*Items*)
 
 
@@ -167,6 +167,37 @@ VerificationTest[  M2MD @ Cell["Test\nTest", "SubsubitemParagraph"], "          
 VerificationTest[  M2MD @ Cell["Test", "ItemNumbered"], "1. Test", TestID -> "ItemNumbered"]
 VerificationTest[  M2MD @ Cell["Test", "SubitemNumbered"], "    1. Test", TestID -> "SubitemNumbered"]
 VerificationTest[  M2MD @ Cell["Test\nTest", "SubsubitemNumbered"], "        1. Test  \nTest", TestID -> "SubsubitemNumbered"]
+
+
+docsCell= Cell[TextData[{
+ "Define an initialized ",
+ Cell[BoxData[
+  TemplateBox[{Cell[
+     TextData["NetChain"]],"paclet:ref/NetChain"},
+   "RefLink",
+   BaseStyle->{"InlineFormula"}]], "InlineFormula",
+  FontFamily->"Source Sans Pro"],
+ ":"
+}], "ExampleText",
+ CellID->480966610];
+
+
+M2MD @ docsCell
+
+
+ClearAll@foo;
+foo[lbl_String, url_String]:=StringTemplate["[``](``)"][lbl, url]
+foo[lbl_String, url_String?(StringContainsQ["reference.wolfram.com"]) ]:= (
+  (*do whatever*)
+  url
+)
+
+M2MD[
+  docsCell, 
+  "MDElementTemplates" -> <|
+     "Hyperlink" -> "<*foo[#, #2]*>"
+  |>
+]
 
 
 Block[{M2MD`Private`$MDEnvironment = True},
