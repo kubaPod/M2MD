@@ -3,22 +3,12 @@ Notebook[{
 Cell[CellGroupData[{
 Cell["M2MD", "Title",ExpressionUUID->"6d30d064-6ad5-4d00-ad1b-e90016088dff"],
 
-Cell[CellGroupData[{
-
 Cell[BoxData[{
  RowBox[{"PacletDirectoryAdd", " ", "@", " ", 
   RowBox[{"NotebookDirectory", "[", "]"}]}], "\n", 
  RowBox[{"SetDirectory", "@", 
   RowBox[{"NotebookDirectory", "[", "]"}]}]}], "Input",
  CellLabel->"In[1]:=",ExpressionUUID->"5384612b-2fdb-4dd0-896d-9c2a84aa7f4e"],
-
-Cell[BoxData[
- RowBox[{"{", "\<\"E:\\\\Idea Projects\\\\M2MD\\\\\"\>", "}"}]], "Output",
- CellLabel->"Out[1]=",ExpressionUUID->"4fc2f148-289f-492c-b73a-023713061dbc"],
-
-Cell[BoxData["\<\"E:\\\\Idea Projects\\\\M2MD\"\>"], "Output",
- CellLabel->"Out[2]=",ExpressionUUID->"28c89337-7872-4138-85dc-a156c3d7c03a"]
-}, Open  ]],
 
 Cell[BoxData[
  RowBox[{"<<", "M2MD`"}]], "Input",
@@ -59,32 +49,18 @@ Cell[BoxData[
  RowBox[{"PreviousCell", "[", "]"}]], "Input",
  CellLabel->"In[37]:=",ExpressionUUID->"abfe85b0-5012-404f-85cc-97d95d6924f5"],
 
-Cell[CellGroupData[{
-
 Cell[BoxData[
  RowBox[{"SetDirectory", "@", "$TemporaryDirectory"}]], "Input",
  CellLabel->"In[1]:=",ExpressionUUID->"92e6ee82-80c3-472c-87a3-4f585b0f016a"],
-
-Cell[BoxData["\<\"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\"\>"], \
-"Output",
- CellLabel->"Out[1]=",ExpressionUUID->"14dff7f1-6f8b-4f8f-97ef-4fc9fe5af625"]
-}, Open  ]],
 
 Cell[BoxData[
  RowBox[{"Import", "@", "\"\<img\\0uz4wtklk8hh5.png\>\""}]], "Input",
  EmphasizeSyntaxErrors->True,
  CellLabel->"In[2]:=",ExpressionUUID->"36c9a17f-5d8c-4bf0-8430-197923a83da6"],
 
-Cell[CellGroupData[{
-
 Cell[BoxData[
  RowBox[{"Directory", "[", "]"}]], "Input",
  CellLabel->"In[9]:=",ExpressionUUID->"2def5db5-5e9f-471e-b3be-9a5ba4bbf29b"],
-
-Cell[BoxData["\<\"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\"\>"], \
-"Output",
- CellLabel->"Out[9]=",ExpressionUUID->"f1939a5c-b965-446b-b7f9-5315afa7e229"]
-}, Open  ]],
 
 Cell[BoxData[
  RowBox[{
@@ -94,14 +70,13 @@ Cell[BoxData[
      RowBox[{"Notebooks", "[", "]"}], "[", 
      RowBox[{"[", "2", "]"}], "]"}]}], "]"}], "//", 
   "AbsoluteTiming"}]], "Input",
- CellLabel->"In[10]:=",ExpressionUUID->"025f7c36-8f61-4289-819d-b87d43162bb0"],
+ CellLabel->"In[2]:=",ExpressionUUID->"025f7c36-8f61-4289-819d-b87d43162bb0"],
 
 Cell[BoxData[
  RowBox[{"SystemOpen", "@", 
   RowBox[{"%", "[", 
    RowBox[{"[", "2", "]"}], "]"}]}]], "Input",
- CellLabel->
-  "In[184]:=",ExpressionUUID->"e33cf853-1695-46b7-8632-2c3284124825"],
+ CellLabel->"In[3]:=",ExpressionUUID->"e33cf853-1695-46b7-8632-2c3284124825"],
 
 Cell[BoxData[
  RowBox[{
@@ -110,12 +85,9 @@ Cell[BoxData[
  CellLabel->
   "In[150]:=",ExpressionUUID->"71e89637-89d5-43c2-a335-281fa7a21993"],
 
-Cell[BoxData["\[DoubleLongRightArrow]"], \
-"Input",ExpressionUUID->"c77ab8b5-685e-43c7-8c4e-41ab702e6a78"],
-
 Cell[BoxData[
- RowBox[{"\[AliasDelimiter]", 
-  "=="}]], "Input",ExpressionUUID->"b305fb4c-f813-49ef-a8ac-59e275324289"]
+ RowBox[{"PrintDefinitions", "@", "M2MD"}]], "Input",
+ CellLabel->"In[1]:=",ExpressionUUID->"0099416c-8c5d-4497-9915-73781789714b"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -126,16 +98,17 @@ Cell["tests", \
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{"TestReport", " ", "/@", " ", 
-  RowBox[{"FileNames", "[", 
-   RowBox[{"\"\<*.m\>\"", ",", " ", 
-    RowBox[{"{", 
-     RowBox[{"FileNameJoin", "[", 
-      RowBox[{"{", 
-       RowBox[{
-        RowBox[{"NotebookDirectory", "[", "]"}], ",", " ", "\"\<Tests\>\""}], 
-       "}"}], "]"}], "}"}]}], "]"}]}]], "Input",
- CellLabel->"In[17]:=",ExpressionUUID->"5b53fe5f-f56a-432c-b96f-b38c91a9e46a"],
+ RowBox[{"reports", "=", 
+  RowBox[{"TestReport", " ", "/@", " ", 
+   RowBox[{"FileNames", "[", 
+    RowBox[{"\"\<*.m\>\"", ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"FileNameJoin", "[", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"NotebookDirectory", "[", "]"}], ",", " ", "\"\<Tests\>\""}],
+         "}"}], "]"}], "}"}]}], "]"}]}]}]], "Input",
+ CellLabel->"In[1]:=",ExpressionUUID->"5b53fe5f-f56a-432c-b96f-b38c91a9e46a"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -296,7 +269,7 @@ Cell[BoxData[
    TestReportObject[
     Association[
     "Title" -> "Test Report: Basic.m", "TimeElapsed" -> 
-     Quantity[0.33, "Seconds"], "TestsSucceededCount" -> 25, 
+     Quantity[0.35000000000000003`, "Seconds"], "TestsSucceededCount" -> 25, 
      "TestsFailedCount" -> 0, "TestsFailedWrongResultsCount" -> 0, 
      "TestsFailedWithMessagesCount" -> 0, "TestsFailedWithErrorsCount" -> 0, 
      "Aborted" -> False, "TestResults" -> Association[1 -> TestResultObject[
@@ -307,8 +280,8 @@ Cell[BoxData[
           HoldForm["0bleddx8vw5yk"], "ActualOutput" -> 
           HoldForm["0bleddx8vw5yk"], "ExpectedMessages" -> {}, 
           "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-          Quantity[0``7.1505149978319915, "Seconds"], "CPUTimeUsed" -> 
-          Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[136, "Bytes"]]], 
+          Quantity[0``7.150514997831988, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[2216, "Bytes"]]], 
        2 -> TestResultObject[
          Association[
          "TestClass" -> None, "TestIndex" -> 2, "TestID" -> "CodeInline", 
@@ -325,9 +298,9 @@ Cell[BoxData[
           HoldForm["Use `Print[1+1]` to print stuff."], 
           "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
           "AbsoluteTimeUsed" -> 
-          Quantity[0.0159241`5.35256989403065, "Seconds"], "CPUTimeUsed" -> 
-          Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[296, "Bytes"]]], 
-       3 -> TestResultObject[
+          Quantity[0.0209382`5.471454341666308, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[51784, "Bytes"]]],
+        3 -> TestResultObject[
          Association[
          "TestClass" -> None, "TestIndex" -> 3, "TestID" -> "LaTeXInline", 
           "Outcome" -> "Success", "Input" -> HoldForm[
@@ -342,15 +315,13 @@ Cell[BoxData[
           HoldForm["### test $1+1$"], "ActualOutput" -> 
           HoldForm["### test $1+1$"], "ExpectedMessages" -> {}, 
           "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-          Quantity[0.001023`4.160390631544148, "Seconds"], "CPUTimeUsed" -> 
-          Quantity[0.016000000000000014`, "Seconds"], "MemoryUsed" -> 
-          Quantity[1376, "Bytes"]]], 4 -> TestResultObject[
+          Quantity[0.0139627`5.295484404781028, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0., "Seconds"], "MemoryUsed" -> 
+          Quantity[723296, "Bytes"]]], 4 -> TestResultObject[
          Association[
          "TestClass" -> None, "TestIndex" -> 4, "TestID" -> "Inline image", 
           "Outcome" -> "Success", "Input" -> HoldForm[
-            
-            Block[{M2MD`Private`ToImageElement, M2MD`Private`MDElement, 
-              StringJoin}, 
+            Block[{M2MD`ToImageElement, M2MD`Private`MDElement, StringJoin}, 
              ToString[
               M2MD`M2MD[
                Cell[
@@ -372,7 +343,7 @@ ToImageElement[FormBox[GraphicsBox[DiskBox[{0, 0}], ImageSize -> 20], \
 TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
           "AbsoluteTimeUsed" -> Quantity[0``7.150514997831988, "Seconds"], 
           "CPUTimeUsed" -> Quantity[0., "Seconds"], "MemoryUsed" -> 
-          Quantity[248, "Bytes"]]], 5 -> TestResultObject[
+          Quantity[7968, "Bytes"]]], 5 -> TestResultObject[
          Association[
          "TestClass" -> None, "TestIndex" -> 5, "TestID" -> 
           "ToImageName[boxes]", "Outcome" -> "Success", "Input" -> HoldForm[
@@ -387,9 +358,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
          "TestClass" -> None, "TestIndex" -> 6, "TestID" -> 
           "Inline image in std form", "Outcome" -> "Success", "Input" -> 
           HoldForm[
-            
-            Block[{M2MD`Private`ToImageElement, M2MD`Private`MDElement, 
-              StringJoin}, 
+            Block[{M2MD`ToImageElement, M2MD`Private`MDElement, StringJoin}, 
              ToString[
               M2MD`M2MD[
                Cell[
@@ -405,7 +374,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           HoldForm[
            "MDElement[h1, StringJoin[{ToImageElement[GraphicsBox[{Disk[{0, \
 0}]}]],  IGraph/M}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
-          "AbsoluteTimeUsed" -> Quantity[0``7.1505149978319915, "Seconds"], 
+          "AbsoluteTimeUsed" -> Quantity[0``7.150514997831988, "Seconds"], 
           "CPUTimeUsed" -> Quantity[0., "Seconds"], "MemoryUsed" -> 
           Quantity[208, "Bytes"]]], 7 -> TestResultObject[
          Association[
@@ -438,9 +407,9 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           "ExpectedOutput" -> HoldForm[True], "ActualOutput" -> 
           HoldForm[True], "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
           "AbsoluteTimeUsed" -> 
-          Quantity[0.0648273`5.962272931828545, "Seconds"], "CPUTimeUsed" -> 
-          Quantity[0.01499999999999968, "Seconds"], "MemoryUsed" -> 
-          Quantity[2508272, "Bytes"]]], 8 -> TestResultObject[
+          Quantity[0.0598127`5.927308405136833, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0.03100000000000014, "Seconds"], "MemoryUsed" -> 
+          Quantity[2911976, "Bytes"]]], 8 -> TestResultObject[
          Association[
          "TestClass" -> None, "TestIndex" -> 8, "TestID" -> "Inline code", 
           "Outcome" -> "Success", "Input" -> HoldForm[
@@ -452,8 +421,8 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           HoldForm["# Inline code: `1+1`"], "ActualOutput" -> 
           HoldForm["# Inline code: `1+1`"], "ExpectedMessages" -> {}, 
           "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-          Quantity[0.0219419`5.49178922926523, "Seconds"], "CPUTimeUsed" -> 
-          Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[144, "Bytes"]]], 
+          Quantity[0.0179526`5.404642352355396, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[472, "Bytes"]]], 
        9 -> TestResultObject[
          Association[
          "TestClass" -> None, "TestIndex" -> 9, "TestID" -> "String", 
@@ -461,7 +430,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
             M2MD`M2MD["string"]], "ExpectedOutput" -> HoldForm["string"], 
           "ActualOutput" -> HoldForm["string"], "ExpectedMessages" -> {}, 
           "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-          Quantity[0``7.1505149978319915, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0``7.150514997831988, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[96, "Bytes"]]], 
        10 -> TestResultObject[
          Association[
@@ -472,7 +441,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           HoldForm["```wl\n1+\n2\n```"], "ActualOutput" -> 
           HoldForm["```wl\n1+\n2\n```"], "ExpectedMessages" -> {}, 
           "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-          Quantity[0.0798218`6.0526365148311525, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0.0817739`6.063129708658439, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[272, "Bytes"]]], 
        11 -> TestResultObject[
          Association[
@@ -485,7 +454,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           HoldForm["```wl\n<<M2MD`\n```"], "ActualOutput" -> 
           HoldForm["```wl\n<<M2MD`\n```"], "ExpectedMessages" -> {}, 
           "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-          Quantity[0.0179527`5.404644771466123, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0.0159311`5.352760761545041, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[280, "Bytes"]]], 
        12 -> TestResultObject[
          Association[
@@ -499,7 +468,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           HoldForm["```\n(*E:\\Idea Projects\\M2MD*)\n```"], 
           "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
           "AbsoluteTimeUsed" -> 
-          Quantity[0.0169545`5.37979998448854, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0.0169603`5.379948527780529, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[296, "Bytes"]]], 
        13 -> TestResultObject[
          Association[
@@ -509,7 +478,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
              Cell["asdasd", "Text"]]], "ExpectedOutput" -> HoldForm["asdasd"],
            "ActualOutput" -> HoldForm["asdasd"], "ExpectedMessages" -> {}, 
           "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-          Quantity[0``7.1505149978319915, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0``7.150514997831988, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[264, "Bytes"]]], 
        14 -> TestResultObject[
          Association[
@@ -520,7 +489,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
               TextData["asdasd"], "Text"]]], "ExpectedOutput" -> 
           HoldForm["asdasd"], "ActualOutput" -> HoldForm["asdasd"], 
           "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
-          "AbsoluteTimeUsed" -> Quantity[0``7.1505149978319915, "Seconds"], 
+          "AbsoluteTimeUsed" -> Quantity[0``7.150514997831988, "Seconds"], 
           "CPUTimeUsed" -> Quantity[0., "Seconds"], "MemoryUsed" -> 
           Quantity[264, "Bytes"]]], 15 -> TestResultObject[
          Association[
@@ -531,10 +500,9 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
               TextData["asdasd"], "Whatever"]]], "ExpectedOutput" -> 
           HoldForm["asdasd"], "ActualOutput" -> HoldForm["asdasd"], 
           "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
-          "AbsoluteTimeUsed" -> 
-          Quantity[0.0009974`4.149384361714334, "Seconds"], "CPUTimeUsed" -> 
-          Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[264, "Bytes"]]], 
-       16 -> TestResultObject[
+          "AbsoluteTimeUsed" -> Quantity[0``7.150514997831988, "Seconds"], 
+          "CPUTimeUsed" -> Quantity[0., "Seconds"], "MemoryUsed" -> 
+          Quantity[264, "Bytes"]]], 16 -> TestResultObject[
          Association[
          "TestClass" -> None, "TestIndex" -> 16, "TestID" -> "Item", 
           "Outcome" -> "Success", "Input" -> HoldForm[
@@ -542,7 +510,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
              Cell["Test", "Item"]]], "ExpectedOutput" -> HoldForm["- Test"], 
           "ActualOutput" -> HoldForm["- Test"], "ExpectedMessages" -> {}, 
           "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-          Quantity[0.0009974`4.149384361714336, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0.0009712`4.1378236715631695, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[2496, "Bytes"]]], 
        17 -> TestResultObject[
          Association[
@@ -574,7 +542,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           HoldForm["    Test"], "ActualOutput" -> HoldForm["    Test"], 
           "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
           "AbsoluteTimeUsed" -> 
-          Quantity[0.0009976`4.149471438302478, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0.0009987`4.149950047708317, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[272, "Bytes"]]], 
        20 -> TestResultObject[
          Association[
@@ -585,7 +553,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           HoldForm["        Test"], "ActualOutput" -> 
           HoldForm["        Test"], "ExpectedMessages" -> {}, 
           "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-          Quantity[0``7.150514997831988, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0.0009969`4.149166593830361, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[272, "Bytes"]]], 
        21 -> TestResultObject[
          Association[
@@ -596,7 +564,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           HoldForm["            Test  \nTest"], "ActualOutput" -> 
           HoldForm["            Test  \nTest"], "ExpectedMessages" -> {}, 
           "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-          Quantity[0``7.1505149978319915, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0``7.150514997831988, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[280, "Bytes"]]], 
        22 -> TestResultObject[
          Association[
@@ -607,7 +575,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           HoldForm["1. Test"], "ActualOutput" -> HoldForm["1. Test"], 
           "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
           "AbsoluteTimeUsed" -> 
-          Quantity[0.0009972`4.149297267663727, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0.0009655`4.135267275947401, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[264, "Bytes"]]], 
        23 -> TestResultObject[
          Association[
@@ -617,10 +585,9 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
              Cell["Test", "SubitemNumbered"]]], "ExpectedOutput" -> 
           HoldForm["    1. Test"], "ActualOutput" -> HoldForm["    1. Test"], 
           "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
-          "AbsoluteTimeUsed" -> 
-          Quantity[0.0009964`4.148948716696461, "Seconds"], "CPUTimeUsed" -> 
-          Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[272, "Bytes"]]], 
-       24 -> TestResultObject[
+          "AbsoluteTimeUsed" -> Quantity[0``7.150514997831988, "Seconds"], 
+          "CPUTimeUsed" -> Quantity[0., "Seconds"], "MemoryUsed" -> 
+          Quantity[272, "Bytes"]]], 24 -> TestResultObject[
          Association[
          "TestClass" -> None, "TestIndex" -> 24, "TestID" -> 
           "SubsubitemNumbered", "Outcome" -> "Success", "Input" -> HoldForm[
@@ -629,7 +596,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           HoldForm["        1. Test  \nTest"], "ActualOutput" -> 
           HoldForm["        1. Test  \nTest"], "ExpectedMessages" -> {}, 
           "ActualMessages" -> {}, "AbsoluteTimeUsed" -> 
-          Quantity[0``7.1505149978319915, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0``7.150514997831988, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[280, "Bytes"]]], 
        25 -> TestResultObject[
          Association[
@@ -646,7 +613,7 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
           "ActualOutput" -> HoldForm["asdasd **adsd**`1*1`"], 
           "ExpectedMessages" -> {}, "ActualMessages" -> {}, 
           "AbsoluteTimeUsed" -> 
-          Quantity[0.0618333`5.941737422942315, "Seconds"], "CPUTimeUsed" -> 
+          Quantity[0.0657955`5.968711189439881, "Seconds"], "CPUTimeUsed" -> 
           Quantity[0., "Seconds"], "MemoryUsed" -> Quantity[280, "Bytes"]]]], 
      "TestsSucceededIndices" -> {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 
       14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}, 
@@ -656,8 +623,14 @@ TraditionalForm]]}]]"], "ExpectedMessages" -> {}, "ActualMessages" -> {},
    Editable->False,
    SelectWithContents->True,
    Selectable->False], "}"}]], "Output",
- CellLabel->"Out[17]=",ExpressionUUID->"28f5b458-2f68-4f2a-94dc-509dacb27134"]
+ CellLabel->"Out[1]=",ExpressionUUID->"5bb48cda-eaf7-4072-8c85-a454779ad58d"]
 }, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"reports", "[", 
+   RowBox[{"[", "1", "]"}], "]"}], "[", "\"\<TestsFailed\>\"", "]"}]], "Input",
+ CellLabel->"In[49]:=",ExpressionUUID->"d22e7dbc-33d2-4263-aca5-976ce47d7d6e"],
 
 Cell[BoxData[
  RowBox[{"Internal`InheritedBlock", "[", 
@@ -834,11 +807,135 @@ Cell[BoxData[
              RowBox[{"0", ",", " ", "0"}], "}"}], "]"}], ",", " ", 
            RowBox[{"ImageSize", " ", "->", " ", "20"}]}], "]"}], "]"}], "  ", 
         "]"}]}], "\n", "}"}], "]"}], ",", " ", "\"\<Text\>\""}], 
-   "]"}]}]], "Code",ExpressionUUID->"0fc696eb-cc54-4fa0-9592-990669609c7b"]
+   "]"}]}]], "Code",ExpressionUUID->"0fc696eb-cc54-4fa0-9592-990669609c7b"],
+
+Cell[CellGroupData[{
+
+Cell["style rules", \
+"Subsection",ExpressionUUID->"f717b148-997b-430a-82e6-35c156df8026"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"SetDirectory", "@", "$TemporaryDirectory"}]], "Input",
+ CellLabel->"In[16]:=",ExpressionUUID->"1715cf84-6479-4d8c-923f-d86b5f270f40"],
+
+Cell[BoxData["\<\"C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\Temp\"\>"], \
+"Output",
+ CellLabel->"Out[16]=",ExpressionUUID->"7472bdb1-4f42-4f30-afa4-89ec0c624956"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{"M2MD", "[", " ", 
+  RowBox[{"Cell", "[", 
+   RowBox[{"\"\<Test\>\"", ",", " ", "\"\<MyStyle\>\""}], "]"}], "]"}], "\n", 
+ RowBox[{"M2MD", "[", " ", 
+  RowBox[{
+   RowBox[{"Cell", "[", 
+    RowBox[{"\"\<Test\>\"", ",", " ", "\"\<MyStyle\>\""}], "]"}], ",", " ", 
+   RowBox[{"\"\<CellStyleRules\>\"", " ", "\[Rule]", " ", 
+    RowBox[{"<|", 
+     RowBox[{"\"\<MyStyle\>\"", " ", "\[Rule]", " ", "\"\<h1\>\""}], 
+     "|>"}]}]}], "]"}], "\n", 
+ RowBox[{"M2MD", "[", " ", 
+  RowBox[{
+   RowBox[{"Cell", "[", 
+    RowBox[{"\"\<Test\>\"", ",", " ", "\"\<MyStyle\>\""}], "]"}], ",", " ", 
+   RowBox[{"\"\<CellStyleRules\>\"", " ", "\[Rule]", " ", 
+    RowBox[{"<|", 
+     RowBox[{"\"\<MyStyle\>\"", " ", "\[Rule]", " ", 
+      RowBox[{"{", 
+       RowBox[{"\"\<h1\>\"", ",", " ", 
+        RowBox[{
+         RowBox[{"BoxesToTeXString", "[", "#", "]"}], "&"}]}], "}"}]}], 
+     "|>"}]}]}], "]"}], "\n", 
+ RowBox[{"M2MD", "[", " ", 
+  RowBox[{
+   RowBox[{"Cell", "[", 
+    RowBox[{"\"\<Test\>\"", ",", " ", "\"\<MyStyle\>\""}], "]"}], ",", " ", 
+   RowBox[{"\"\<CellStyleRules\>\"", " ", "\[Rule]", " ", 
+    RowBox[{"<|", 
+     RowBox[{"\"\<MyStyle\>\"", " ", "\[Rule]", " ", 
+      RowBox[{"{", 
+       RowBox[{"\"\<h1\>\"", ",", " ", 
+        RowBox[{
+         RowBox[{"ToImageElement", "[", "#", "]"}], "&"}]}], "}"}]}], 
+     "|>"}]}]}], "]"}]}], "Code",
+ CellLabel->"In[17]:=",ExpressionUUID->"eaf31bfc-43b5-4ee1-9b62-dbe6f3ef2ecd"],
+
+Cell[BoxData["\<\"Test\"\>"], "Output",
+ CellLabel->"Out[17]=",ExpressionUUID->"4ac7ba1d-c8d8-4e38-a3d7-3976a18de017"],
+
+Cell[BoxData["\<\"# Test\"\>"], "Output",
+ CellLabel->"Out[18]=",ExpressionUUID->"d9ab6f38-3ead-4730-b9c0-75b5dc46df57"],
+
+Cell[BoxData["\<\"# \\\\text{Test}\"\>"], "Output",
+ CellLabel->"Out[19]=",ExpressionUUID->"3fc00031-185a-4721-8da0-5dbe61a91fb3"],
+
+Cell[BoxData["\<\"# ![0tcrut3pb10j4](img\\\\0tcrut3pb10j4.png)\"\>"], "Output",
+ CellLabel->"Out[20]=",ExpressionUUID->"02605330-6539-4ba5-9fbe-432ab4d34173"]
+}, Open  ]],
+
+Cell[" specification {tag_, parsers___} translates to ", \
+"Text",ExpressionUUID->"7ed0adeb-bc69-4543-9cad-b1be780426dc"],
+
+Cell[BoxData[
+ RowBox[{"MDElement", "[", 
+  RowBox[{"tag", ",", " ", 
+   RowBox[{"parser1", "[", 
+    RowBox[{"cell_", ",", " ", "style_"}], "]"}], ",", " ", 
+   RowBox[{"parser2", "[", 
+    RowBox[{"cell_", ",", " ", "style_"}], "]"}], ",", " ", "___"}], 
+  "]"}]], "Code",ExpressionUUID->"ea446a9d-91d4-454c-9818-c9eeba495d9e"],
+
+Cell["\<\
+Built-in parsers :
+BoxesToMDString
+BoxesToInputString
+ToImageElement
+BoxesToTeXString
+
+But you can use whatever you want as long as it returns something that \
+MDElementTemplate for given tag can handle.\
+\>", "Text",ExpressionUUID->"1a0ae989-cd03-44cf-a988-9fc47f4c2a9f"],
+
+Cell["We can go even further and define a brand new conversion:", \
+"Text",ExpressionUUID->"5de9ed14-c9e5-41b7-9bd9-867373faab85"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"\n", 
+  RowBox[{"M2MD", "[", " ", 
+   RowBox[{
+    RowBox[{"Cell", "[", 
+     RowBox[{"\"\<Test\>\"", ",", " ", "\"\<MyStyle\>\""}], "]"}], ",", " ", 
+    "\[IndentingNewLine]", 
+    RowBox[{"\"\<CellStyleRules\>\"", " ", "\[Rule]", " ", 
+     RowBox[{"<|", 
+      RowBox[{"\"\<MyStyle\>\"", " ", "\[Rule]", " ", "\"\<myTag\>\""}], 
+      "|>"}]}], ",", "\[IndentingNewLine]", " ", 
+    RowBox[{"\"\<MDElementTemplates\>\"", "\[Rule]", 
+     RowBox[{"<|", 
+      RowBox[{"\"\<myTag\>\"", "\[Rule]", "\"\<# ((((``))))\\n---\>\""}], 
+      "|>"}]}]}], "\[IndentingNewLine]", "]"}]}]], "Input",
+ CellLabel->"In[25]:=",ExpressionUUID->"41679aa3-cd5b-4514-b3d6-a26534bf015b"],
+
+Cell[BoxData["\<\"# ((((Test))))\\n---\"\>"], "Output",
+ CellLabel->"Out[25]=",ExpressionUUID->"3f836914-aae7-466e-9b37-c67c04872c05"]
+}, Open  ]],
+
+Cell["\<\
+Together with \[OpenCurlyDoubleQuote]IgnoredStyles\[CloseCurlyDoubleQuote] \
+option you can probably get a lot done with standard documentation notebooks\
+\>", "Text",ExpressionUUID->"a2c7340a-2a89-4013-8189-ddf7fb74b415"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{776, 872},
+WindowSize->{1225, 872},
 WindowMargins->{{Automatic, 115}, {Automatic, 60}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,

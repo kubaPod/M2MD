@@ -25,16 +25,26 @@
 
 BeginPackage["M2MD`"];
 
+
 Unprotect["`*", "`*`*"]
 ClearAll["`*", "`*`*"]
 
+
 M2MD::usage = "M2MD[obj] converts object to markdown string";
+
 MDExport::usage = "MDExport[\"path/to.md\", obj]"
 
-
 WithLineBreaks::usage = "WithLineBreaks[string] is a helper function that prepends double space to new lines, md parsers consider is a line break."
-Begin["`Private`"];
 
+BoxesToMDString;
+BoxesToInputString;
+ToImageElement;
+BoxesToTeXString;
+
+
+
+
+Begin["`Private`"];
 
 
 (* ::Chapter:: *)
@@ -46,12 +56,13 @@ Begin["`Private`"];
 
 
 MDExport // Options = {
-  "ImagesExportURL" -> Automatic, (*Automatic | None | path_String*)
-  "ImagesFetchURL" -> "Relative", (*Automatic | "Relative" | path_String*)    
-  "IgnoredStyles" -> None,
+  "ImagesExportURL"   -> Automatic, (*Automatic | None | path_String*)
+  "ImagesFetchURL"    -> "Relative", (*Automatic | "Relative" | path_String*)    
+  "IgnoredStyles"     -> None,
   "ImageNameFunction" -> Automatic,
-  "OverwriteImages" -> True, (*boole*)
-  "MDElementTemplates" -> Automatic (* _String | template_ *)
+  "OverwriteImages"   -> True, (*boole*)
+  "CellStyleRules"    -> Automatic, (* style_ \[Rule] tag_ | style_ \[Rule] {tag, Function[{style, _Cell}, _]..}*)
+  "MDElementTemplates"-> Automatic (* _String | template_ *)
 }
 
 
@@ -70,13 +81,41 @@ MDEnvironment // Options = Options @ MDExport;
 MDEnvironment[___, OptionsPattern[] ]:= Function[
   expr
 , Internal`InheritedBlock[
-    { MDElement, $MDMonitor = Hold }
+    { M2MD, MDElement, $MDMonitor = Hold }
+    
   , MDElementLoad @ OptionValue @ "MDElementTemplates"
+  
+  ; M2MDLoad      @ OptionValue @ "CellStyleRules"
+    
   ; expr
   ]
 , HoldAll
 
 ]
+
+
+(* ::Section:: *)
+(*LoadDefinitions*)
+
+
+LoadDefinitions // Options = {
+  "StandardizationFunction" -> Identity,
+  "DefinitionFunction" -> Hold
+};
+
+LoadDefinitions[ definitions : KeyValuePattern[{}], OptionsPattern[] ]:= With[
+  { standardize = OptionValue["StandardizationFunction"] 
+  , define = OptionValue["DefinitionFunction"]  
+  }
+, Module[{std}  
+  , std = standardize /@ Normal @ definitions
+  ; std = ToDownValue /@ std
+  ; std /. RuleDelayed[ _[rhs_], lhs_] :> define[rhs, lhs]  
+  ]
+]
+
+ToDownValue[ rule_[ rhs:Except[_HoldPattern] , lhs_] ] := HoldPattern[rhs] :> lhs;
+ToDownValue[ r_Rule ] := RuleDelayed @@ r
 
 
 (* ::Section:: *)
@@ -146,20 +185,34 @@ M2MD[ cell : Cell[_, style_, ___], opt : OptionsPattern[] ] := M2MD[style, cell,
 (*style rules*)
 
 
-(
-  M2MD[ #, cell_, opt: OptionsPattern[] ]:= MDElement[#2, BoxesToMDString[ cell, False, opt ] ]
-) & @@@ Partition[
-  {   "Title", "h1"
-    , "Subtitle", "Bold"
-    , "Subsubtitle", "Bold"
-    , "Section", "h2"
-    , "Subsection", "h3"
-    , "Subsubsection", "h4"
-    , "Subsubsubsection", "h5"
-    , "Subsubsubsubsection", "h6"
-  }
-  , 2
+$CellStyleRules = {
+  "Title"->"h1",
+  "Subtitle"->"Bold",
+  "Subsubtitle"->"Bold",
+  "Section"->"h2",
+  "Subsection"->"h3",
+  "Subsubsection"->"h4",
+  "Subsubsubsection"->"h5",
+  "Subsubsubsubsection"->"h6"
+}
+
+
+M2MDSet[style_String , tag_String]:= M2MDSet[style , {tag, BoxesToMDString[#[[1]]]& }]
+
+M2MDSet[style_String , {tag_String, parsers___}]:= DownValues[M2MD] = Insert[
+  DownValues[M2MD]
+, HoldPattern @ M2MD[style, cell_Cell, opt: OptionsPattern[] ] :> MDElement[tag, Sequence @@ Through[{parsers}[cell, style] ] ]
+, 2
 ]
+(*M2MDSet[style_String , {tag_, parsers__}]:= M2MD[style, cell_, opt: OptionsPattern[] ] := MDElement[tag, BoxesToMDString @ First @ cell]*)
+
+
+M2MDLoad[defs_]:=LoadDefinitions[   defs, "DefinitionFunction" -> M2MDSet ] 
+
+
+M2MDLoad @ $CellStyleRules
+
+
    (*etc*)
 
 M2MD[ "SlideShowNavigationBar", ___]:= MDElement["ThematicBreak"]
@@ -392,26 +445,6 @@ MDElement[args___]:= ( Message[MDElement::unknownTag, args]; "");
 
 
 
-LoadDefinitions // Options = {
-  "StandardizationFunction" -> Identity,
-  "DefinitionFunction" -> Hold
-};
-
-LoadDefinitions[ definitions : KeyValuePattern[{}], OptionsPattern[] ]:= With[
-  { standardize = OptionValue["StandardizationFunction"] 
-  , define = OptionValue["DefinitionFunction"]  
-  }
-, Module[{std}  
-  , std = standardize /@ Normal @ definitions
-  ; std = ToDownValue /@ std
-  ; std /. RuleDelayed[ _[rhs_], lhs_] :> define[rhs, lhs]  
-  ]
-]
-
-ToDownValue[ rule_[ rhs:Except[_HoldPattern] , lhs_] ] := HoldPattern[rhs] :> lhs;
-ToDownValue[ r_Rule ] := RuleDelayed @@ r
-
-
 MDElementDefine[tag_String , lhs_String]:= MDElement[tag, args___]:= Block[
   { WithLineBreaks = StringReplace[#, "\n" -> "  \n"]& }
 , StringTemplate[lhs][args]
@@ -428,7 +461,7 @@ MDElementLoad[defs_]:=LoadDefinitions[   defs, "DefinitionFunction" -> MDElement
 MDElementLoad @ $MDElementTemplates
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*ProcessMDString*)
 
 

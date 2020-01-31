@@ -7,7 +7,7 @@
 
 
 Needs @ "M2MD`";
-Once @ AppendTo[$ContextPath, "M2MD`Private`"];
+AppendTo[$ContextPath, "M2MD`Private`"];
 
 
 VerificationTest[
@@ -165,6 +165,14 @@ VerificationTest[
 , "asdasd **adsd**`1*1`"
 , TestID -> "Inline cells"
 ]
+
+
+(* ::Section:: *)
+(*StyleRules*)
+
+
+(* ::Section:: *)
+(*end*)
 
 
 $ContextPath = DeleteCases["M2MD`Private`"] @ $ContextPath;
