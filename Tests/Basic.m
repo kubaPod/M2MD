@@ -7,7 +7,7 @@
 
 
 Needs @ "M2MD`";
-Once @ AppendTo[$ContextPath, "M2MD`Private`"]
+Once @ AppendTo[$ContextPath, "M2MD`Private`"];
 
 
 VerificationTest[
@@ -18,7 +18,7 @@ VerificationTest[
 
 
 VerificationTest[
-  M2MD @ Cell[TextData[{
+ M2MD @ Cell[TextData[{
  "Use ",
  Cell[BoxData[  RowBox[{"Print", "[",   RowBox[{"1", "+", "1"}], "]"}]]], " to print stuff."}], "Text"]
 , "Use `Print[1+1]` to print stuff."
@@ -127,29 +127,6 @@ VerificationTest[  M2MD @ Cell[TextData@"asdasd", "Text"], "asdasd", TestID -> "
 VerificationTest[  M2MD @ Cell[TextData@"asdasd", "Whatever"], "asdasd", TestID -> "unknown text style"]
 
 
-M2MD @ Cell[BoxData[
- RowBox[{  RowBox[{"test", "=", " ",    GraphicsBox[DiskBox[{0, 0}]]}], ";"}]], "Code" ]
-
-
-M2MD @ Cell[TextData[{
- "test ",
- Cell[BoxData[
-  GraphicsBox[DiskBox[{0, 0}], ImageSize -> 20]]  ]
-}], "Text"]
-
-
-Import@"img\1wm4d46lfhvv2.png"
-
-
-(* ::Text:: *)
-(*Cell[TextData[{*)
-(* "test ",*)
-(* Cell[BoxData[*)
-(*  GraphicsBox[DiskBox[{0, 0}], ImageSize -> 20]]  ]*)
-(*}], "Text",*)
-(* CellChangeTimes->{{3.789380678711265*^9, 3.789380685243788*^9}}]*)
-
-
 (* ::Section:: *)
 (*Items*)
 
@@ -169,64 +146,25 @@ VerificationTest[  M2MD @ Cell["Test", "SubitemNumbered"], "    1. Test", TestID
 VerificationTest[  M2MD @ Cell["Test\nTest", "SubsubitemNumbered"], "        1. Test  \nTest", TestID -> "SubsubitemNumbered"]
 
 
-docsCell= Cell[TextData[{
- "Define an initialized ",
- Cell[BoxData[
-  TemplateBox[{Cell[
-     TextData["NetChain"]],"paclet:ref/NetChain"},
-   "RefLink",
-   BaseStyle->{"InlineFormula"}]], "InlineFormula",
-  FontFamily->"Source Sans Pro"],
- ":"
-}], "ExampleText",
- CellID->480966610];
-
-
-M2MD @ docsCell
-
-
-ClearAll@foo;
-foo[lbl_String, url_String]:=StringTemplate["[``](``)"][lbl, url]
-foo[lbl_String, url_String?(StringContainsQ["reference.wolfram.com"]) ]:= (
-  (*do whatever*)
-  url
-)
-
-M2MD[
-  docsCell, 
-  "MDElementTemplates" -> <|
-     "Hyperlink" -> "<*foo[#, #2]*>"
-  |>
-]
-
-
-Block[{M2MD`Private`$MDEnvironment = True},
-  Hold @ M2MD @ Cell["Test", "Item"] /. DownValues[M2MD] 
-]
-
-
-M2MD`Private`ItemStyleQ@"Item"
-
-
-PrintDefinitions @ M2MD
-
-
 (* ::Section:: *)
-(*help*)
+(*Inline cells*)
 
 
-Internal`InheritedBlock[{$MDEnvironment = True, M2MD}, Attributes[M2MD]={};
-  Nest[
-    ReplaceAll[DownValues[M2MD]]
-  , Hold @ M2MD @ Cell["1+\n2", "Program"]
-  , 2
-  ]
+VerificationTest[
+  M2MD[
+  Cell[
+  TextData[{
+    "asdasd ",
+    StyleBox["adsd",FontWeight->"Bold"],
+    
+    Cell[BoxData[RowBox[{"1","*","1"}]]]
+  }]
+,"Text"
+],
+ "ImagesExportURL" -> None ]
+, "asdasd **adsd**`1*1`"
+, TestID -> "Inline cells"
 ]
 
 
-Internal`InheritedBlock[{$MDEnvironment = True, M2MD}, Attributes[M2MD]={};
-  MatchQ[
-    Hold @ M2MD["Program", Cell["1+\n2", "Program"] ],
-    Verbatim[Hold] @ Verbatim[M2MD][ _?(Echo@*InputStyleQ@*Echo), cell_]
-  ]
-]
+$ContextPath = DeleteCases["M2MD`Private`"] @ $ContextPath;

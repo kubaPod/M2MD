@@ -31,6 +31,8 @@ ClearAll["`*", "`*`*"]
 M2MD::usage = "M2MD[obj] converts object to markdown string";
 MDExport::usage = "MDExport[\"path/to.md\", obj]"
 
+
+WithLineBreaks::usage = "WithLineBreaks[string] is a helper function that prepends double space to new lines, md parsers consider is a line break."
 Begin["`Private`"];
 
 
@@ -39,7 +41,7 @@ Begin["`Private`"];
 (* Implementation code*)
 
 
-(* ::Subsection:: *)
+(* ::Section:: *)
 (*MDExport*)
 
 
@@ -77,8 +79,12 @@ MDEnvironment[___, OptionsPattern[] ]:= Function[
 ]
 
 
-(* ::Subsection:: *)
-(*M2MD*)
+(* ::Section:: *)
+(*M2MD (whatever to MD)*)
+
+
+(* ::Subsection::Closed:: *)
+(*sugar*)
 
 
 (*M2MD // Attributes = {HoldAllComplete}; again at the end*)
@@ -136,7 +142,9 @@ M2MD[ cell : Cell[_, style_, ___], opt : OptionsPattern[] ] := M2MD[style, cell,
 (*Convertions*)
 
 
+(* ::Subsection:: *)
 (*style rules*)
+
 
 (
   M2MD[ #, cell_, opt: OptionsPattern[] ]:= MDElement[#2, BoxesToMDString[ cell, False, opt ] ]
@@ -154,11 +162,12 @@ M2MD[ cell : Cell[_, style_, ___], opt : OptionsPattern[] ] := M2MD[style, cell,
 ]
    (*etc*)
 
-M2MD[ _?InputStyleQ, cell:_[_?InputFormQ, ___], opts: OptionsPattern[]]:= MDElement["CodeBlock", BoxesToInputString @ cell ]
-
+M2MD[ style_?InputStyleQ    , cell:_[_?InputFormQ, ___], opts: OptionsPattern[]]:= MDElement["CodeBlock", BoxesToInputString @ cell ]
 M2MD[ style_?NumberedStyleQ , cell_, opts: OptionsPattern[]]:= MDElement["NumberedItem", ItemLevel[style], BoxesToMDString[cell, False, opts] ]
 M2MD[ style_?ParagraphStyleQ, cell_, opts: OptionsPattern[]]:= MDElement["Paragraph"   , ItemLevel[style], BoxesToMDString[cell, False, opts] ]
 M2MD[ style_?ItemStyleQ     , cell_, opts: OptionsPattern[]]:= MDElement["Item"        , ItemLevel[style], BoxesToMDString[cell, False, opts] ]
+
+M2MD[ "SlideShowNavigationBar", ___]:= MDElement["ThematicBreak"]
 
 InputStyleQ     = MemberQ[{"Input","Code","Program", "ExternalLanguage"}, #]& (*TODO, language*)
 NumberedStyleQ  = StringContainsQ["itemNumbered", IgnoreCase -> True]
@@ -168,7 +177,10 @@ ItemStyleQ      = StringContainsQ["item", IgnoreCase -> True]
 ItemLevel = StringCount[#, "sub", IgnoreCase -> True]&
 
 
+(* ::Subsection::Closed:: *)
 (*content rules*)
+
+
 M2MD[style_, cell:_[_TextData|_String, ___], opt : OptionsPattern[]
 ] := MDElement["Text", BoxesToMDString[ cell, False, opt ] ]
 
@@ -277,25 +289,9 @@ FirstCellTag[{tag_String, ___}]:=tag;
 
 
 
-(* ::Subsection::Closed:: *)
-(*style wrapper*)
+(* ::Section:: *)
+(*Cell Contents To MD*)
 
-
-ToStyleElementFunction[opts___] := Module[
-  {italic, bold, wrapper }
-
-, bold = MemberQ[{opts}, Verbatim[Rule][FontWeight, "Bold"]]
-; If[ bold, Return @ MDElement["Bold", # ]& ]
-
-; italic = MemberQ[{opts}, Verbatim[Rule][FontSlant, "Italic"]]
-; If[ italic, Return @ MDElement["Italic", # ]&]
-
-; Identity
-];
-
-
-(* ::Subsection::Closed:: *)
-(*parse cell data*)
 
 parseData[ cell_Cell ]:= parseData @ First @ cell
 parseData[TextData[boxes_]]:= parseData @ boxes
@@ -308,7 +304,7 @@ parseData[ Cell[BoxData[boxes_?inlineImageQ], ___] ]:= ToImageElement[boxes]
 inlineImageQ = Not @* FreeQ[GraphicsBox | Graphics3DBox | DynamicModuleBox ]
 
 
-parseData[ Cell[BoxData[boxes_?InputFormQ], ___]]:=MDElement["CodeInline", BoxesToInputString @  boxes]
+parseData[ Cell[BoxData[boxes_?InputFormQ], ___]]:= MDElement["CodeInline", BoxesToInputString @ boxes]
 
 parseData[ Cell[BoxData[FormBox[boxes_, TraditionalForm]], ___] ]:= MDElement["LaTeXInline", BoxesToTeXString @ boxes]
 
@@ -318,32 +314,31 @@ parseData[ Cell[BoxData[FormBox[boxes_, TraditionalForm]], ___] ]:= MDElement["L
 parseData[ Cell[BoxData[boxes_], ___] ] := parseData @ boxes (*TODO: with box replacements*)
 
 
-parseData[StyleBox[expr_, opts___]] := ToStyleElementFunction[opts] @ parseData[expr];
+parseData[StyleBox[expr_, ___, FontWeight -> "Bold", ___]]   := MDElement["Bold", parseData @ expr]
+parseData[StyleBox[expr_, ___, FontSlant  -> "Italic", ___]] := MDElement["Italic", parseData @ expr]
+parseData[StyleBox[expr_, ___]]                               := MDElement["Text", parseData @ expr]
 
 
 parseData[FormBox[boxes : Except[_TagBox], TraditionalForm, ___]] :=  MDElement["LaTeXInline", BoxesToTeXString@boxes]
 
 
-parseData[ TemplateBox[{lbl_String, {url_String, tag_}, note_}, "HyperlinkDefault", ___]
-] := MDElement["Hyperlink", parseData @ lbl, url]
+parseData[ TemplateBox[{lbl_, {url_, tag_}, note_}, "HyperlinkDefault", ___]
+] := MDElement["Hyperlink", lbl, url]
 
-parseData[ TemplateBox[{lbl_String, url_}, "HyperlinkURL", ___]
-] := MDElement["Hyperlink", parseData @ lbl, url]
+parseData[ TemplateBox[{lbl_, url_}, "HyperlinkURL", ___]
+] := MDElement["Hyperlink", lbl, url]
 
-parseData[ bbox:ButtonBox[lbl_String, ___, BaseStyle -> "Hyperlink", ___]
-] := MDElement["Hyperlink", parseData @ lbl, ToExpression[bbox][[2]] ]
+parseData[ bbox:ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ___]
+] := MDElement["Hyperlink", lbl, ToExpression[bbox][[2]] ]
 
 parseData[ bbox:ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ___]
 ] := MDElement["Hyperlink", ToString@#, ToString@#2 ]& @@ ToExpression[bbox]
 
 parseData[ ButtonBox[lbl_, ___, ButtonData -> (s_String ? (StringStartsQ["paclet:"])), ___] ]:=
-  MDElement["Hyperlink", parseData @ lbl, "https://reference.wolfram.com/language/" <> StringTrim[s, "paclet:"]]
+  MDElement["Hyperlink", lbl, "https://reference.wolfram.com/language/" <> StringTrim[s, "paclet:"]]
 
-parseData[ TemplateBox[{lbl_, ref_String}, "RefLink"|"RefLinkPlain", ___]
-]:= MDElement["Hyperlink", parseData @ lbl, "https://reference.wolfram.com/language/" <> StringTrim[ref, "paclet:"]]
-
-
-(*parseData[ graphics:(_GraphicsBox| _GraphicsBox3D) ]:=ToImageElement[graphics]*)
+parseData[ TemplateBox[{lbl_, ref_}, "RefLink"|"RefLinkPlain", ___]
+]:= MDElement["Hyperlink", lbl, "https://reference.wolfram.com/language/" <> StringTrim[ref, "paclet:"]]
 
 
    (*default behaviour for boxes*)
@@ -362,6 +357,8 @@ $MDElementTemplates = <|
   , "Text"       -> "``"
   , "Bold"       -> "**``**"
   , "Italic"     -> "*``*"
+  
+  , "ThematicBreak"-> "---"
 
   , "h1" -> "# <*WithLineBreaks @ #*>"
   , "h2" -> "## <*WithLineBreaks @ #*>"
@@ -377,13 +374,15 @@ $MDElementTemplates = <|
 
   , "Comment"   -> "[//]: # (``)"
   , "CodeBlock" -> TemplateExpression @ StringJoin["```wl\n", TemplateSlot[1], "\n```"]
-  , "CodeInline" -> TemplateExpression @ StringJoin["`", TemplateSlot[1], "`"]
+  , "CodeInline"-> TemplateExpression @ StringJoin["`", TemplateSlot[1], "`"]
   , "Output"    -> TemplateExpression @ StringJoin["```\n(*", TemplateSlot[1], "*)\n```"]
 
 |>;
 
 
 MDElement::unknownTag = "Unknown MDElement tag: ``.";
+
+MDElement["Hyperlink", a___, b:Except[_String], c___] := MDElement["Hyperlink", a, parseData @ b, c]
 
 MDElement[args___]:= ( Message[MDElement::unknownTag, args]; "");
 
@@ -427,38 +426,7 @@ MDElementLoad[defs_]:=LoadDefinitions[   defs, "DefinitionFunction" -> MDElement
 MDElementLoad @ $MDElementTemplates
 
 
-(*MDElementInit[ r : KeyValuePattern[{}] ]:= KeyValueMap[MDElementInit, r];
-
-MDElementInit[ tag_String, template_String]:= MDElementInit[tag, StringTemplate @ template];
-
-MDElementInit[ tag_String, template_]:= (MDElement[tag, args__]:=TemplateApply[template, {args}] )
-
-MDElementInit[Automatic]:={};*)
-
-
-(*MDElementInit @ $MDElementTemplates;
-
-  
-
-*)
-
-
-(* ::Subsection:: *)
-(*BoxToString*)
-
-
-BoxesToTeXString[boxes_] := Check[
-  Convert`TeX`BoxesToTeX[boxes],
-  ToImageElement @ boxes
-]
-
-
-BoxesToInputString[ boxData_]:= StringReplace[BoxesToString[boxData, "PlainText"],  "\r\n"|"\n" -> "\n"]
-BoxesToString[ boxData_, type_]:= First @ FrontEndExecute @ FrontEnd`ExportPacket[boxData, type]
-
-
-
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*ProcessMDString*)
 
 
@@ -481,6 +449,27 @@ ProcessMDString[ md_String ]:= StringReplace[md,
   , "\\[DoubleLongRightArrow]" -> "==>"
   }
 ] 
+
+
+(* ::Section:: *)
+(*Utilities*)
+
+
+(* ::Subsection:: *)
+(*BoxToString*)
+
+
+BoxesToTeXString[boxes_] := Check[
+  Convert`TeX`BoxesToTeX[boxes],
+  ToImageElement @ boxes
+]
+
+
+BoxesToInputString[ boxData_]:= StringReplace[BoxesToString[boxData, "PlainText"],  "\r\n"|"\n" -> "\n"]
+
+
+BoxesToString[ boxes:_, type_:"InputText"]:=BoxesToString[BoxData @ boxes, type]
+BoxesToString[ boxes:_BoxData, type_]:= First @ FrontEndExecute @ FrontEnd`ExportPacket[boxes, type]
 
 
 (* ::Chapter:: *)
