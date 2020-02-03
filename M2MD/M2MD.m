@@ -60,6 +60,7 @@ MDExport // Options = {
   "ImagesFetchURL"    -> "Relative", (*Automatic | "Relative" | path_String*)    
   "IgnoredStyles"     -> None,
   "ImageNameFunction" -> Automatic,
+  "BoxesToStringType" -> "PlainText", (*whatever ExportPacket supports*)
   "OverwriteImages"   -> True, (*boole*)
   "CellStyleRules"    -> Automatic, (* style_ \[Rule] tag_ | style_ \[Rule] {tag, Function[{style, _Cell}, _]..}*)
   "MDElementTemplates"-> Automatic (* _String | template_ *)
@@ -83,11 +84,13 @@ MDEnvironment // Options = Options @ MDExport;
 MDEnvironment[___, OptionsPattern[] ]:= Function[
   expr
 , Internal`InheritedBlock[
-    { M2MD, MDElement, $MDMonitor = Hold }
+    { M2MD, MDElement, $MDMonitor = Hold, $BoxesToStringType }
     
   , MDElementLoad @ OptionValue @ "MDElementTemplates"
   
   ; M2MDLoad      @ OptionValue @ "CellStyleRules"
+
+  ; $BoxesToStringType = OptionValue["BoxesToStringType"]
     
   ; expr
   ]
@@ -385,11 +388,11 @@ parseData[ TemplateBox[{lbl_, {url_, tag_}, note_}, "HyperlinkDefault", ___]
 parseData[ TemplateBox[{lbl_, url_}, "HyperlinkURL", ___]
 ] := MDElement["Hyperlink", lbl, url]
 
-parseData[ bbox:ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ___]
-] := MDElement["Hyperlink", lbl, ToExpression[bbox][[2]] ]
 
-parseData[ bbox:ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ___]
-] := MDElement["Hyperlink", ToString@#, ToString@#2 ]& @@ ToExpression[bbox]
+(* Insert > Hyperlink interpretation, the problem is that the label is a plain string rather than a string
+which underwent ToBoxes so I will assume it is 'ready'. I am not sure how many edge case we have here. *)
+parseData[ ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ButtonData -> { url_String | URL[url_], ___ }, ___]
+] := MDElement["Hyperlink", lbl, url ]
 
 parseData[ ButtonBox[lbl_, ___, ButtonData -> (s_String ? (StringStartsQ["paclet:"])), ___] ]:=
   MDElement["Hyperlink", lbl, "https://reference.wolfram.com/language/" <> StringTrim[s, "paclet:"]]
@@ -499,9 +502,9 @@ BoxesToTeXString[boxes_] := Check[
   ToImageElement @ boxes
 ]
 
-
+$BoxesToStringType = "PlainText";
 BoxesToInputString[cell_Cell]:= BoxesToInputString @ First @ cell;
-BoxesToInputString[ boxData_]:= StringReplace[BoxesToString[boxData, "PlainText"],  "\r\n"|"\n" -> "\n"]
+BoxesToInputString[ boxData_]:= StringReplace[BoxesToString[boxData, $BoxesToStringType],  "\r\n"|"\n" -> "\n"]
 
 
 BoxesToString[ boxes:_, type_:"InputText"]:=BoxesToString[BoxData @ boxes, type]
