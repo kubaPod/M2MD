@@ -224,7 +224,8 @@ M2MD[ "SlideShowNavigationBar", ___]:= MDElement["ThematicBreak"]
 
 M2MD[ "Output", Cell[inputForm_String, ___], ___]:= MDElement["CodeBlock", inputForm];
 
-M2MD[ style_?InputStyleQ    , cell:_[_?InputFormQ, ___], opts: OptionsPattern[]]:= MDElement["CodeBlock", BoxesToInputString @ cell ]
+M2MD[ style_?InputStyleQ    , cell:_[_?InputFormQ, ___], opts: OptionsPattern[]
+] := MDElement["CodeBlock", BoxesToInputString @ cell ]
 M2MD[ style_?NumberedStyleQ , cell_, opts: OptionsPattern[]]:= MDElement["NumberedItem", ItemLevel[style], BoxesToMDString[cell, False, opts] ]
 M2MD[ style_?ParagraphStyleQ, cell_, opts: OptionsPattern[]]:= MDElement["Paragraph"   , ItemLevel[style], BoxesToMDString[cell, False, opts] ]
 M2MD[ style_?ItemStyleQ     , cell_, opts: OptionsPattern[]]:= MDElement["Item"        , ItemLevel[style], BoxesToMDString[cell, False, opts] ]
