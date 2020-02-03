@@ -66,7 +66,8 @@ MDExport // Options = {
 }
 
 
-MDExport[path_String , obj_, patt : OptionsPattern[]]:= Export[
+MDExport[path_String , obj_, patt : OptionsPattern[]]:=
+Export[
   path
 , M2MD[obj
   , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
@@ -74,6 +75,7 @@ MDExport[path_String , obj_, patt : OptionsPattern[]]:= Export[
   , patt (*will overwrite that path if needed*)
   ] 
 , "Text"
+, CharacterEncoding -> "UTF8"
 ]
 
 MDEnvironment // Options = Options @ MDExport;
