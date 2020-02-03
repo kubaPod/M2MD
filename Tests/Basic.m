@@ -127,6 +127,40 @@ VerificationTest[  M2MD @ Cell[TextData@"asdasd", "Text"], "asdasd", TestID -> "
 VerificationTest[  M2MD @ Cell[TextData@"asdasd", "Whatever"], "asdasd", TestID -> "unknown text style"]
 
 
+VerificationTest[
+  M2MD @ Cell[BoxData[RowBox[{"M2MD"," ","@"}]],"Code", CellLabel->"TEST"]
+, "```wl\nM2MD @\n```"
+, TestID -> "Cell to InputCode"
+]
+
+
+$inputCell = Cell[BoxData[RowBox[{"foo","[","\[IndentingNewLine]",RowBox[{"bar","[","\[IndentingNewLine]",RowBox[{"1",",","2"}],"\[IndentingNewLine]","]"}],"\[IndentingNewLine]","]"}]],"Input"];
+
+VerificationTest[
+  M2MD[$inputCell, "BoxesToStringType" -> "InputText"]
+, "```wl\nfoo[\n bar[\n  1, 2\n  ]\n ]\n```"
+, TestID -> "BoxesToStringType"
+]
+
+
+VerificationTest[
+  parseData@ButtonBox["the C/igraph documentation",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://igraph.org/c/doc/"], None},
+  ButtonNote->"http://igraph.org/c/doc/"]
+, "[the C/igraph documentation](http://igraph.org/c/doc/)"
+, TestID -> "parseData@ButtonBox[\"the C/igraph documentation\",BaseStyle->\"Hyp..."
+]
+
+
+VerificationTest[
+  M2MD @ Cell["test","Output",CellLabel->"Out[79]//InputForm="]
+, "```wl\ntest\n```"
+, TestID -> "InputForm output"
+]
+
+
 (* ::Section:: *)
 (*Items*)
 
