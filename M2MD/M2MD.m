@@ -480,8 +480,6 @@ ProcessMDString[ md_String ]:= StringReplace[md,
   , "\\[InlinePart]"     -> "@>"
   , "\\[TwoWayRule]"     -> "<->"
 
-  , "\\[LongRightArrow]" -> "-->"
-  , "\\[DoubleLongRightArrow]" -> "==>"
   }
 ] 
 
@@ -500,6 +498,7 @@ BoxesToTeXString[boxes_] := Check[
 ]
 
 
+BoxesToInputString[cell_Cell]:= BoxesToInputString @ First @ cell;
 BoxesToInputString[ boxData_]:= StringReplace[BoxesToString[boxData, "PlainText"],  "\r\n"|"\n" -> "\n"]
 
 
