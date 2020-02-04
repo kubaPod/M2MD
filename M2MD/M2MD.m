@@ -41,7 +41,7 @@ BoxesToInputString;
 ToImageElement;
 BoxesToTeXString;
 
-
+SmartWrap;
 
 
 Begin["`Private`"];
@@ -389,12 +389,13 @@ parseData[ Cell[BoxData[FormBox[boxes_, TraditionalForm]], ___] ]:= MDElement["L
 parseData[ Cell[BoxData[boxes_], ___] ] := parseData @ boxes (*TODO: with box replacements*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*forms/styles*)
 
 
-parseData[StyleBox[expr_, ___, FontWeight -> "Bold", ___]]   := MDElement["Bold", parseData @ expr]
-parseData[StyleBox[expr_, ___, FontSlant  -> "Italic", ___]] := MDElement["Italic", parseData @ expr]
+
+parseData[StyleBox[expr_, a___, FontWeight -> "Bold", b___]]   := MDElement["Bold", parseData @ StyleBox[expr, a, b]]
+parseData[StyleBox[expr_, a___, FontSlant  -> "Italic", b___]] := MDElement["Italic", parseData @ StyleBox[expr, a, b]]
 parseData[StyleBox[expr_, ___]]                               := MDElement["Text", parseData @ expr]
 
 
@@ -440,14 +441,17 @@ parseData[boxes_] := ToImageElement[boxes];
 (*$MDElementTemplates*)
 
 
+(* Functions used in templates should be package exported symbols *)
+
+
 $MDElementTemplates = <|
     "LaTeXBlock" -> "$$``$$"
   , "LaTeXInline"-> "$``$"
   , "Image"      -> "![``](``)"
   , "Hyperlink"  -> "[``](``)"
   , "Text"       -> "``"
-  , "Bold"       -> "**``**"
-  , "Italic"     -> "*``*"
+  , "Bold"       -> TemplateExpression @ SmartWrap[TemplateSlot[1], "**"]
+  , "Italic"     -> TemplateExpression @ SmartWrap[TemplateSlot[1], "*"]
   
   , "ThematicBreak"-> "---"
 
@@ -469,6 +473,15 @@ $MDElementTemplates = <|
   , "Output"    -> TemplateExpression @ StringJoin["```\n(*", TemplateSlot[1], "*)\n```"]
 
 |>;
+
+
+SmartWrap[body_String, wrap_String]:= Module[{once=False}, StringReplace[
+  body
+, { StartOfString ~~ p:(" "...) :> p <> wrap
+  , p:(" "...) ~~ EndOfString   :> If[!once, once=True; wrap <>p, ""] (*because otherwise it matches twice  O_o *)
+  }
+  ]
+]
 
 
 (* ::Subsection:: *)

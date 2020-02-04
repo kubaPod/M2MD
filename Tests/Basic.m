@@ -143,6 +143,56 @@ VerificationTest[
 
 
 (* ::Section:: *)
+(*Smart Wrap*)
+
+
+VerificationTest[
+  M2MD@Cell[TextData[{
+ "a",
+ StyleBox["s ",  FontWeight->"Bold"],
+ "d"
+}], "Section"]
+, "## a**s** d"
+, TestID -> "smart wrap cell"
+]
+
+
+VerificationTest[
+  SmartWrap["test", "**"]
+, "**test**"
+, TestID -> "smart wrap 1"
+]
+
+
+VerificationTest[
+  SmartWrap[" test", "**"]
+, " **test**"
+, TestID -> "smart wrap 2"
+]
+
+
+VerificationTest[
+  SmartWrap[" test ", "**"]
+, " **test** "
+, TestID -> "smart wrap 3"
+]
+
+
+VerificationTest[
+  SmartWrap["test ", "**"]
+, "**test** "
+, TestID -> "smart wrap 4"
+]
+
+
+M2MD[
+ Cell[TextData[{StyleBox["Note:", FontWeight -> "Bold", 
+     FontSlant -> "Italic"], 
+    StyleBox[" foo bar baz.", FontSlant -> "Italic"]}], "Text"]
+ ]
+
+
+(* ::Section:: *)
 (*CodeBlocks*)
 
 
