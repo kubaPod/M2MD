@@ -55,7 +55,7 @@ Begin["`Private`"];
 (*MDExport*)
 
 
-$BoxesToStringType = "PlainText";
+$BoxesToStringType = "InputText";
 $CodeLanguage = "mathematica";
 
 MDExport // Options = {
