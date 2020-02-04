@@ -102,22 +102,8 @@ VerificationTest[  M2MD @ "string", "string", TestID -> "String"]
 
 
 VerificationTest[
-  M2MD @ Cell["1+\n2", "Program"]
-, "```wl\n1+\n2\n```"
-, TestID -> "Program cell"
-]
-
-
-VerificationTest[
-  M2MD @ Cell[BoxData[ RowBox[{"<<", "M2MD`"}]], "Input"]
-, "```wl\n<<M2MD`\n```"
-, TestID -> "InputBlock"
-]
-
-
-VerificationTest[
-  M2MD @ Cell[BoxData["\<\"E:\\\\Idea Projects\\\\M2MD\"\>"], "Output"]
-, "```\n(*E:\\Idea Projects\\M2MD*)\n```"
+  M2MD @ Cell[BoxData["\"E:\\\\Idea Projects\\\\M2MD\""],"Output",CellLabel->"Out[6]="]
+, "```\n(*\"E:\\\\Idea Projects\\\\M2MD\"*)\n```"
 , TestID -> "Simple output"
 ]
 
@@ -125,22 +111,6 @@ VerificationTest[
 VerificationTest[  M2MD @ Cell["asdasd", "Text"], "asdasd", TestID -> "simple text"]
 VerificationTest[  M2MD @ Cell[TextData@"asdasd", "Text"], "asdasd", TestID -> "simple text data"]
 VerificationTest[  M2MD @ Cell[TextData@"asdasd", "Whatever"], "asdasd", TestID -> "unknown text style"]
-
-
-VerificationTest[
-  M2MD @ Cell[BoxData[RowBox[{"M2MD"," ","@"}]],"Code", CellLabel->"TEST"]
-, "```wl\nM2MD @\n```"
-, TestID -> "Cell to InputCode"
-]
-
-
-$inputCell = Cell[BoxData[RowBox[{"foo","[","\[IndentingNewLine]",RowBox[{"bar","[","\[IndentingNewLine]",RowBox[{"1",",","2"}],"\[IndentingNewLine]","]"}],"\[IndentingNewLine]","]"}]],"Input"];
-
-VerificationTest[
-  M2MD[$inputCell, "BoxesToStringType" -> "InputText"]
-, "```wl\nfoo[\n bar[\n  1, 2\n  ]\n ]\n```"
-, TestID -> "BoxesToStringType"
-]
 
 
 VerificationTest[
@@ -156,8 +126,68 @@ VerificationTest[
 
 VerificationTest[
   M2MD @ Cell["test","Output",CellLabel->"Out[79]//InputForm="]
-, "```wl\ntest\n```"
+, "```mathematica\ntest\n```"
 , TestID -> "InputForm output"
+]
+
+
+VerificationTest[
+  M2MD@Cell[TextData[ButtonBox["National Renewable Energy Laboratory (NREL) data",
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["www.wolfram.com"], None},
+ ButtonNote->"www.wolfram.com"]], "Subsection"]
+, "### [National Renewable Energy Laboratory (NREL) data](www.wolfram.com)"
+, TestID -> "Subsection>Hyperlink"
+]
+
+
+(* ::Section:: *)
+(*CodeBlocks*)
+
+
+M2MD@Cell["asd", "Code"]
+
+
+M2MD[ Cell["asd", "Code"], "CodeLanguage" -> "whatever"]
+
+
+M2MD[ Cell["asd", "Program"]]
+
+
+M2MD@Cell["asd", "ExternalLanguage", CellEvaluationLanguage->"Julia"]
+
+
+M2MD@Cell["asd", "ExternalLanguage", CellEvaluationLanguage->"NodeJS"]
+
+
+VerificationTest[
+  M2MD @ Cell["1+\n2", "Program"]
+, "```\n1+\n2\n```"
+, TestID -> "Program cell"
+]
+
+
+VerificationTest[
+  M2MD @ Cell[BoxData[ RowBox[{"<<", "M2MD`"}]], "Input"]
+, "```mathematica\n<<M2MD`\n```"
+, TestID -> "InputBlock"
+]
+
+
+VerificationTest[
+  M2MD @ Cell[BoxData[RowBox[{"M2MD"," ","@"}]],"Code", CellLabel->"TEST"]
+, "```mathematica\nM2MD @\n```"
+, TestID -> "Cell to InputCode"
+]
+
+
+$inputCell = Cell[BoxData[RowBox[{"foo","[","\[IndentingNewLine]",RowBox[{"bar","[","\[IndentingNewLine]",RowBox[{"1",",","2"}],"\[IndentingNewLine]","]"}],"\[IndentingNewLine]","]"}]],"Input"];
+
+VerificationTest[
+  M2MD[$inputCell, "BoxesToStringType" -> "InputText"]
+, "```mathematica\nfoo[\n bar[\n  1, 2\n  ]\n ]\n```"
+, TestID -> "BoxesToStringType"
 ]
 
 

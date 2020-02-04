@@ -55,14 +55,22 @@ Begin["`Private`"];
 (*MDExport*)
 
 
+$BoxesToStringType = "PlainText";
+$CodeLanguage = "mathematica";
+
 MDExport // Options = {
   "ImagesExportURL"   -> Automatic, (*Automatic | None | path_String*)
   "ImagesFetchURL"    -> "Relative", (*Automatic | "Relative" | path_String*)    
-  "IgnoredStyles"     -> None,
   "ImageNameFunction" -> Automatic,
-  "BoxesToStringType" -> "PlainText", (*whatever ExportPacket supports*)
   "OverwriteImages"   -> True, (*boole*)
+  
+  "IgnoredStyles"     -> None,
   "CellStyleRules"    -> Automatic, (* style_ \[Rule] tag_ | style_ \[Rule] {tag, Function[{style, _Cell}, _]..}*)
+  
+  "CodeLanguage"      -> $CodeLanguage,
+      
+  "BoxesToStringType" -> $BoxesToStringType, (*whatever ExportPacket supports*)  
+  
   "MDElementTemplates"-> Automatic (* _String | template_ *)
 }
 
@@ -84,13 +92,13 @@ MDEnvironment // Options = Options @ MDExport;
 MDEnvironment[___, OptionsPattern[] ]:= Function[
   expr
 , Internal`InheritedBlock[
-    { M2MD, MDElement, $MDMonitor = Hold, $BoxesToStringType }
+    { M2MD, MDElement, $MDMonitor = Hold, $BoxesToStringType, $CodeLanguage }
     
-  , MDElementLoad @ OptionValue @ "MDElementTemplates"
-  
+  , MDElementLoad @ OptionValue @ "MDElementTemplates"  
   ; M2MDLoad      @ OptionValue @ "CellStyleRules"
 
   ; $BoxesToStringType = OptionValue["BoxesToStringType"]
+  ; $CodeLanguage      = OptionValue["CodeLanguage"]
     
   ; expr
   ]
@@ -166,8 +174,6 @@ CombineMDCells = StringJoin @ Map[ToString] @ Riffle[#, "\n\n"]&
 (* Syntactic sugar *)
 
 (*TODO: cell groups, raw data, style data *)
-(*TODO: where do I need cell objects *)
-(*TODO: when do I use inline rules? *)
 
 
 
@@ -222,17 +228,23 @@ M2MDLoad @ $CellStyleRules
 
 M2MD[ "SlideShowNavigationBar", ___]:= MDElement["ThematicBreak"]
 
-M2MD[ "Output", Cell[inputForm_String, ___], ___]:= MDElement["CodeBlock", inputForm];
+M2MD[ "Output", Cell[inputForm_String, ___], ___]:= MDElement["CodeBlock", inputForm, $CodeLanguage];
 
 M2MD[ style_?InputStyleQ    , cell:_[_?InputFormQ, ___], opts: OptionsPattern[]
-] := MDElement["CodeBlock", BoxesToInputString @ cell ]
+] := MDElement["CodeBlock", BoxesToInputString @ cell,  CodeLanguage[style, cell] ]
+
 M2MD[ style_?NumberedStyleQ , cell_, opts: OptionsPattern[]]:= MDElement["NumberedItem", ItemLevel[style], BoxesToMDString[cell, False, opts] ]
 M2MD[ style_?ParagraphStyleQ, cell_, opts: OptionsPattern[]]:= MDElement["Paragraph"   , ItemLevel[style], BoxesToMDString[cell, False, opts] ]
 M2MD[ style_?ItemStyleQ     , cell_, opts: OptionsPattern[]]:= MDElement["Item"        , ItemLevel[style], BoxesToMDString[cell, False, opts] ]
 
 
 
-InputStyleQ     = MemberQ[{"Input","Code","Program", "ExternalLanguage"}, #]& (*TODO, language*)
+CodeLanguage["Input" | "Code", _]:=$CodeLanguage;
+CodeLanguage["ExternalLanguage", cell_]:= Lookup[Rest @ Rest @ Apply[List] @ cell, CellEvaluationLanguage, "Python"] /. "NodeJS" -> "javascript" // ToLowerCase
+CodeLanguage[___]:= ""
+
+
+InputStyleQ     = MemberQ[{"Input", "Code", "Program", "ExternalLanguage"}, #]& (*TODO, language*)
 NumberedStyleQ  = StringContainsQ["itemNumbered", IgnoreCase -> True]
 ParagraphStyleQ = StringContainsQ["itemParagraph", IgnoreCase -> True]
 ItemStyleQ      = StringContainsQ["item", IgnoreCase -> True]
@@ -240,7 +252,7 @@ ItemStyleQ      = StringContainsQ["item", IgnoreCase -> True]
 ItemLevel = StringCount[#, "sub", IgnoreCase -> True]&
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*content rules*)
 
 
@@ -271,7 +283,7 @@ BoxesToMDString[boxes_, inlineCell_:True, opt : OptionsPattern[]]:= parseData[bo
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Section::Closed:: *)
 (*ToImageElement*)
 
 
@@ -377,12 +389,20 @@ parseData[ Cell[BoxData[FormBox[boxes_, TraditionalForm]], ___] ]:= MDElement["L
 parseData[ Cell[BoxData[boxes_], ___] ] := parseData @ boxes (*TODO: with box replacements*)
 
 
+(* ::Subsection::Closed:: *)
+(*forms/styles*)
+
+
 parseData[StyleBox[expr_, ___, FontWeight -> "Bold", ___]]   := MDElement["Bold", parseData @ expr]
 parseData[StyleBox[expr_, ___, FontSlant  -> "Italic", ___]] := MDElement["Italic", parseData @ expr]
 parseData[StyleBox[expr_, ___]]                               := MDElement["Text", parseData @ expr]
 
 
 parseData[FormBox[boxes : Except[_TagBox], TraditionalForm, ___]] :=  MDElement["LaTeXInline", BoxesToTeXString@boxes]
+
+
+(* ::Subsection::Closed:: *)
+(*hyperlinks*)
 
 
 parseData[ TemplateBox[{lbl_, {url_, tag_}, note_}, "HyperlinkDefault", ___]
@@ -404,12 +424,20 @@ parseData[ TemplateBox[{lbl_, ref_}, "RefLink"|"RefLinkPlain", ___]
 ]:= MDElement["Hyperlink", lbl, "https://reference.wolfram.com/language/" <> StringTrim[ref, "paclet:"]]
 
 
+(* ::Subsection::Closed:: *)
+(*defaults*)
+
+
    (*default behaviour for boxes*)
 parseData[boxes_] := ToImageElement[boxes];
 
 
-(* ::Subsection:: *)
+(* ::Section:: *)
 (*MDElement*)
+
+
+(* ::Subsection:: *)
+(*$MDElementTemplates*)
 
 
 $MDElementTemplates = <|
@@ -436,21 +464,31 @@ $MDElementTemplates = <|
 
 
   , "Comment"   -> "[//]: # (``)"
-  , "CodeBlock" -> TemplateExpression @ StringJoin["```wl\n", TemplateSlot[1], "\n```"]
+  , "CodeBlock" -> TemplateExpression @ StringJoin["```", TemplateSlot[2], "\n", TemplateSlot[1], "\n```"]
   , "CodeInline"-> TemplateExpression @ StringJoin["`", TemplateSlot[1], "`"]
   , "Output"    -> TemplateExpression @ StringJoin["```\n(*", TemplateSlot[1], "*)\n```"]
 
 |>;
 
 
+(* ::Subsection:: *)
+(*sugar*)
+
+
 MDElement::unknownTag = "Unknown MDElement tag: ``.";
 
 MDElement["Hyperlink", a___, b:Except[_String], c___] := MDElement["Hyperlink", a, parseData @ b, c]
+
+MDElement["CodeBlock", code_]:=MDElement["CodeBlock", code, ""]
 
 MDElement[args___]:= ( Message[MDElement::unknownTag, args]; "");
 
 
 
+
+
+(* ::Subsection::Closed:: *)
+(*loading*)
 
 
 MDElementDefine[tag_String , lhs_String]:= MDElement[tag, args___]:= Block[
@@ -469,7 +507,7 @@ MDElementLoad[defs_]:=LoadDefinitions[   defs, "DefinitionFunction" -> MDElement
 MDElementLoad @ $MDElementTemplates
 
 
-(* ::Subsection::Closed:: *)
+(* ::Section:: *)
 (*ProcessMDString*)
 
 
@@ -505,8 +543,10 @@ BoxesToTeXString[boxes_] := Check[
   ToImageElement @ boxes
 ]
 
-$BoxesToStringType = "PlainText";
+
 BoxesToInputString[cell_Cell]:= BoxesToInputString @ First @ cell;
+
+
 BoxesToInputString[ boxData_]:= StringReplace[BoxesToString[boxData, $BoxesToStringType],  "\r\n"|"\n" -> "\n"]
 
 
