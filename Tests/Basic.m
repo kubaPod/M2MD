@@ -21,7 +21,7 @@ VerificationTest[
  M2MD @ Cell[TextData[{
  "Use ",
  Cell[BoxData[  RowBox[{"Print", "[",   RowBox[{"1", "+", "1"}], "]"}]]], " to print stuff."}], "Text"]
-, "Use `Print[1+1]` to print stuff."
+, "Use `Print[1 + 1]` to print stuff."
 , TestID -> "CodeInline"
 ]
 
@@ -92,7 +92,7 @@ VerificationTest[
 
 VerificationTest[
   M2MD @ Cell[TextData @ {"Inline code: ", Cell[BoxData[{"1+1"}]]}, "Title"]
-, "# Inline code: `1+1`"
+, "# Inline code: `1 + 1`"
 , TestID -> "Inline code"
 ]
 
@@ -146,31 +146,51 @@ VerificationTest[
 (*CodeBlocks*)
 
 
-M2MD@Cell["asd", "Code"]
+VerificationTest[
+  M2MD@Cell["asd", "Code"]
+, "```mathematica\nasd\n```"
+, TestID -> "Code Language"
+]
 
 
-M2MD[ Cell["asd", "Code"], "CodeLanguage" -> "whatever"]
+VerificationTest[
+  M2MD[ Cell["asd", "Code"], "CodeLanguage" -> "whatever"]
+, "```whatever\nasd\n```"
+, TestID -> "Custom Language"
+]
 
 
-M2MD[ Cell["asd", "Program"]]
+VerificationTest[
+  M2MD[ Cell["asd", "Program"]]
+, "```\nasd\n```"
+, TestID -> "ProgramLanguage"
+]
 
 
-M2MD@Cell["asd", "ExternalLanguage", CellEvaluationLanguage->"Julia"]
+VerificationTest[
+  M2MD@Cell["asd", "ExternalLanguage", CellEvaluationLanguage->"Julia"]
+, "```julia\nasd\n```"
+, TestID -> "Julia language"
+]
 
 
-M2MD@Cell["asd", "ExternalLanguage", CellEvaluationLanguage->"NodeJS"]
+VerificationTest[
+  M2MD@Cell["asd", "ExternalLanguage", CellEvaluationLanguage->"NodeJS"]
+, "```javascript\nasd\n```"
+, TestID -> "NodeJS language"
+]
 
 
 VerificationTest[
   M2MD @ Cell["1+\n2", "Program"]
-, "```\n1+\n2\n```"
+, "```\n1 +\n 2\n```"
 , TestID -> "Program cell"
 ]
 
 
 VerificationTest[
   M2MD @ Cell[BoxData[ RowBox[{"<<", "M2MD`"}]], "Input"]
-, "```mathematica\n<<M2MD`\n```"
+, "```mathematica\n<< M2MD`\n```"
 , TestID -> "InputBlock"
 ]
 
