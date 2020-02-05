@@ -389,9 +389,11 @@ parseData[ Cell[BoxData[FormBox[boxes_, TraditionalForm]], ___] ]:= MDElement["L
 parseData[ Cell[BoxData[boxes_], ___] ] := parseData @ boxes (*TODO: with box replacements*)
 
 
+parseData[InterpretationBox[boxes_, ___] ]:= parseData @ boxes
+
+
 (* ::Subsection:: *)
 (*forms/styles*)
-
 
 
 parseData[StyleBox[expr_, a___, FontWeight -> "Bold", b___]]   := MDElement["Bold", parseData @ StyleBox[expr, a, b]]
@@ -557,14 +559,14 @@ BoxesToTeXString[boxes_] := Check[
 ]
 
 
-BoxesToInputString[cell_Cell]:= BoxesToInputString @ First @ cell;
+
 
 
 BoxesToInputString[ boxData_]:= StringReplace[BoxesToString[boxData, $BoxesToStringType],  "\r\n"|"\n" -> "\n"]
 
 
-BoxesToString[ boxes:_, type_:"InputText"]:=BoxesToString[BoxData @ boxes, type]
-BoxesToString[ boxes:_BoxData, type_]:= First @ FrontEndExecute @ FrontEnd`ExportPacket[boxes, type]
+BoxesToString[ boxes:Except[_BoxData|_Cell], type_:"InputText"]:=BoxesToString[BoxData @ boxes, type]
+BoxesToString[ boxes_, type_:"InputText"]:= First @ FrontEndExecute @ FrontEnd`ExportPacket[boxes, type]
 
 
 (* ::Chapter:: *)
