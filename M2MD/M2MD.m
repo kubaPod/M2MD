@@ -370,6 +370,7 @@ FirstCellTag[{tag_String, ___}]:=tag;
 
 parseData[ cell_Cell ]:= parseData @ First @ cell
 parseData[TextData[boxes_]]:= parseData @ boxes
+parseData[RowBox[row_]]:= parseData @ row;
 parseData[list_List] := StringJoin[parseData /@ list];
 
 parseData[string_String] := string;
