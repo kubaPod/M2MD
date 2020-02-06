@@ -405,7 +405,7 @@ parseData[StyleBox[expr_, ___]]                               := MDElement["Text
 parseData[FormBox[boxes : Except[_TagBox], TraditionalForm, ___]] :=  MDElement["LaTeXInline", BoxesToTeXString@boxes]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*hyperlinks*)
 
 
@@ -424,7 +424,7 @@ parseData[ ButtonBox[lbl_, ___, BaseStyle -> "Hyperlink", ButtonData -> { url_St
 parseData[ ButtonBox[lbl_, ___, ButtonData -> (s_String ? (StringStartsQ["paclet:"])), ___] ]:=
   MDElement["Hyperlink", lbl, "https://reference.wolfram.com/language/" <> StringTrim[s, "paclet:"]]
 
-parseData[ TemplateBox[{lbl_, ref_}, "RefLink"|"RefLinkPlain", ___]
+parseData[ TemplateBox[{lbl_, ref_}, "RefLink"|"RefLinkPlain"|"StringTypeLink", ___]
 ]:= MDElement["Hyperlink", lbl, "https://reference.wolfram.com/language/" <> StringTrim[ref, "paclet:"]]
 
 
