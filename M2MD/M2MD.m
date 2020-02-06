@@ -563,7 +563,25 @@ BoxesToTeXString[boxes_] := Check[
 
 
 
-BoxesToInputString[ boxData_]:= StringReplace[BoxesToString[boxData, $BoxesToStringType],  "\r\n"|"\n" -> "\n"]
+(*InputText is nice but has a fixed page width...*)
+
+BoxesToInputString[ boxData_]:=  Module[
+  {tagged, mark = "ORYGINALMARK", iNL = FromCharacterCode@{62371}}
+  ,
+  tagged = boxData /. (n : "\n" | iNL) :> mark <> n;
+  tagged = First @ FrontEndExecute @  FrontEnd`ExportPacket[tagged, "InputText"];
+
+  StringReplace[
+   tagged,
+   {
+    (mark ~~ "\r"...~~"\n") :> "\n",
+    "\\"~~"\r"...~~"\n" -> "", (* in strings *)
+    ("\r"...) ~~ "\n" ~~ " " ... -> ""
+    }
+   ]
+]
+
+
 
 
 BoxesToString[ boxes:Except[_BoxData|_Cell], type_:"InputText"]:=BoxesToString[BoxData @ boxes, type]
