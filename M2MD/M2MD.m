@@ -135,7 +135,7 @@ ToDownValue[ r_Rule ] := RuleDelayed @@ r
 (*M2MD (whatever to MD)*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*sugar*)
 
 
@@ -158,7 +158,7 @@ M2MD[nb_NotebookObject, patt: OptionsPattern[]] :=  Module[
   { cells, ignoredStyles = OptionValue["IgnoredStyles"] }
 , cells = Cells @ nb
 ; If[ MatchQ[ignoredStyles, {__String}]
-  , cells = Complement[cells, Cells[nb, CellStyle->ignoredStyles]]
+  , cells = DeleteCases[cells, Alternatives @@ Cells[nb, CellStyle->ignoredStyles]]
   ]
   
 ; ProcessMDString @
