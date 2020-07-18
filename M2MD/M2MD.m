@@ -79,10 +79,15 @@ MDExport[path_String , obj_, patt : OptionsPattern[]]:=
 Export[
   path
 , M2MD[obj
-  , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
-  , "ImagesFetchURL"  -> "Relative"
-  , patt (*will overwrite that path if needed*)
-  ] 
+  , Normal@Merge[
+      {
+          "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
+        , "ImagesFetchURL"  -> "Relative"
+        , patt (*will overwrite that path if needed*)
+      },
+      Last
+    ]
+  ]
 , "Text"
 , CharacterEncoding -> "UTF8"
 ]
