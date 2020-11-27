@@ -21,7 +21,7 @@ VerificationTest[  M2MD @ "string", "string", TestID -> "String"]
 (*tests*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Image*)
 
 
@@ -68,7 +68,7 @@ ToString @ M2MD @ Cell[TextData[{
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Cells*)
 
 
@@ -77,7 +77,7 @@ VerificationTest[  M2MD @ Cell[TextData@"asdasd", "Text"], "asdasd", TestID -> "
 VerificationTest[  M2MD @ Cell[TextData@"asdasd", "Whatever"], "asdasd", TestID -> "unknown text style"]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*CodeBlocks*)
 
 
@@ -118,7 +118,7 @@ VerificationTest[
 
 VerificationTest[
   M2MD @ Cell["1+\n2", "Program"]
-, "```\n1 +\n 2\n```"
+, "```\n1+\n2\n```"
 , TestID -> "Program cell"
 ]
 
@@ -141,12 +141,12 @@ $inputCell = Cell[BoxData[RowBox[{"foo","[","\[IndentingNewLine]",RowBox[{"bar",
 
 VerificationTest[
   M2MD[$inputCell, "BoxesToStringType" -> "InputText"]
-, "```mathematica\nfoo[\n bar[\n  1, 2\n  ]\n ]\n```"
+, "```mathematica\nfoo[\n  bar[\n   1, 2 \n  ] \n ]\n```"
 , TestID -> "BoxesToStringType"
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Items*)
 
 
@@ -165,7 +165,7 @@ VerificationTest[  M2MD @ Cell["Test", "SubitemNumbered"], "    1. Test", TestID
 VerificationTest[  M2MD @ Cell["Test\nTest", "SubsubitemNumbered"], "        1. Test  \nTest", TestID -> "SubsubitemNumbered"]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Output cells*)
 
 
@@ -183,7 +183,7 @@ VerificationTest[
 ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*CellContents*)
 
 
@@ -227,7 +227,7 @@ VerificationTest[
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Smart Wrap*)
 
 
@@ -277,7 +277,7 @@ M2MD[
  ]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*Inline cells*)
 
 

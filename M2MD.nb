@@ -8,13 +8,12 @@ Cell[BoxData[{
   RowBox[{"NotebookDirectory", "[", "]"}]}], "\n", 
  RowBox[{"SetDirectory", "@", 
   RowBox[{"NotebookDirectory", "[", "]"}]}]}], "Input",
- CellLabel->"In[50]:=",ExpressionUUID->"5384612b-2fdb-4dd0-896d-9c2a84aa7f4e"],
+ CellLabel->"In[1]:=",ExpressionUUID->"5384612b-2fdb-4dd0-896d-9c2a84aa7f4e"],
 
 Cell[BoxData[
  RowBox[{"\[IndentingNewLine]", 
   RowBox[{"<<", "M2MD`"}]}]], "Input",
- CellLabel->
-  "In[114]:=",ExpressionUUID->"aeb9f136-81cb-44fa-b647-6baeefdfeb0d"],
+ CellLabel->"In[3]:=",ExpressionUUID->"aeb9f136-81cb-44fa-b647-6baeefdfeb0d"],
 
 Cell[BoxData[
  RowBox[{"M2MD", "[", 
@@ -25,7 +24,7 @@ Cell[BoxData[
     RowBox[{"<|", 
      RowBox[{"\"\<CodeBlock\>\"", "\[Rule]", "\"\<<!-->\>\""}], "|>"}]}]}], 
   "]"}]], "Input",
- CellLabel->"In[53]:=",ExpressionUUID->"b07a7c12-8c95-4337-8025-bd973939e722"],
+ CellLabel->"In[4]:=",ExpressionUUID->"b07a7c12-8c95-4337-8025-bd973939e722"],
 
 Cell[BoxData[
  RowBox[{
@@ -107,15 +106,13 @@ Cell[BoxData[
         RowBox[{
          RowBox[{"NotebookDirectory", "[", "]"}], ",", " ", "\"\<Tests\>\""}],
          "}"}], "]"}], "}"}]}], "]"}]}]}]], "Input",
- CellLabel->
-  "In[119]:=",ExpressionUUID->"5b53fe5f-f56a-432c-b96f-b38c91a9e46a"],
+ CellLabel->"In[28]:=",ExpressionUUID->"5b53fe5f-f56a-432c-b96f-b38c91a9e46a"],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"reports", "[", 
    RowBox[{"[", "1", "]"}], "]"}], "[", "\"\<TestsFailed\>\"", "]"}]], "Input",
- CellLabel->
-  "In[116]:=",ExpressionUUID->"d22e7dbc-33d2-4263-aca5-976ce47d7d6e"],
+ CellLabel->"In[29]:=",ExpressionUUID->"d22e7dbc-33d2-4263-aca5-976ce47d7d6e"],
 
 Cell[BoxData[
  RowBox[{"Internal`InheritedBlock", "[", 
@@ -387,7 +384,41 @@ Cell[BoxData[
 Cell["\<\
 Together with \[OpenCurlyDoubleQuote]IgnoredStyles\[CloseCurlyDoubleQuote] \
 option you can probably get a lot done with standard documentation notebooks\
-\>", "Text",ExpressionUUID->"a2c7340a-2a89-4013-8189-ddf7fb74b415"]
+\>", "Text",ExpressionUUID->"a2c7340a-2a89-4013-8189-ddf7fb74b415"],
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"nb", "=", 
+   RowBox[{"NotebookPut", "@", 
+    RowBox[{"Notebook", "@", 
+     RowBox[{"List", "@", 
+      RowBox[{"Cell", "[", 
+       RowBox[{
+        RowBox[{"BoxData", "@", 
+         RowBox[{"ToBoxes", "@", 
+          RowBox[{"Graphics", "@", 
+           RowBox[{"Disk", "[", "]"}]}]}]}], ",", "\"\<Output\>\""}], 
+       "]"}]}]}]}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"Block", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"Export", "=", "export"}], "}"}], ",", "\[IndentingNewLine]", 
+   RowBox[{"MDExport", "[", "\[IndentingNewLine]", 
+    RowBox[{
+    "\"\<Test\>\"", ",", "\[IndentingNewLine]", "nb", ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{"\"\<ImagesFetchURL\>\"", "\[Rule]", 
+      RowBox[{"URL", "[", "\"\<img\>\"", "]"}]}]}], "\[IndentingNewLine]", 
+    "]"}]}], "\[IndentingNewLine]", "]"}], "\[IndentingNewLine]", 
+ RowBox[{"NotebookClose", "@", "nb"}], "\[IndentingNewLine]"}], "Input",
+ CellLabel->"In[25]:=",ExpressionUUID->"c039053a-85d4-460a-aa52-949f83cac01f"],
+
+Cell[BoxData[
+ RowBox[{"BoxesToInputString", "@", 
+  RowBox[{"First", "@", 
+   RowBox[{"NotebookRead", "@", 
+    RowBox[{"PreviousCell", "[", "]"}]}]}]}]], "Input",
+ CellLabel->"In[37]:=",ExpressionUUID->"3df94578-38f1-46b3-b99d-06502cb2765d"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
@@ -396,7 +427,7 @@ WindowSize->{1225, 872},
 WindowMargins->{{Automatic, 115}, {Automatic, 60}},
 PrivateNotebookOptions->{"FileOutlineCache"->False},
 TrackCellChangeTimes->False,
-FrontEndVersion->"12.1 for Microsoft Windows (64-bit) (January 31, 2020)",
+FrontEndVersion->"12.2 for Microsoft Windows (64-bit) (November 25, 2020)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"a30fb722-6a7c-4cb4-b35e-8e13214df9f1"
 ]

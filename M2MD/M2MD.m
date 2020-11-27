@@ -79,13 +79,15 @@ MDExport[path_String , obj_, patt : OptionsPattern[]]:=
 Export[
   path
 , M2MD[obj
+  , patt (*will overwrite that path if needed*)
   , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
   , "ImagesFetchURL"  -> "Relative"
-  , patt (*will overwrite that path if needed*)
+  
   ] 
 , "Text"
 , CharacterEncoding -> "UTF8"
 ]
+
 
 MDEnvironment // Options = Options @ MDExport;
 
@@ -107,7 +109,7 @@ MDEnvironment[___, OptionsPattern[] ]:= Function[
 ]
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*LoadDefinitions*)
 
 
@@ -192,7 +194,7 @@ M2MD[ cell : Cell[_, style_, ___], opt : OptionsPattern[] ] := M2MD[style, cell,
 (*Convertions*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*style rules*)
 
 
@@ -252,7 +254,7 @@ ItemStyleQ      = StringContainsQ["item", IgnoreCase -> True]
 ItemLevel = StringCount[#, "sub", IgnoreCase -> True]&
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*content rules*)
 
 
@@ -308,7 +310,7 @@ ToImageElement[cell_,  patt : OptionsPattern[]]:=
   ]  
 ; exportPath = FileNameJoin[{exportDir, baseName<>".png"}]
 
-; fetchDir  = Switch[ fetchURL
+; fetchDir  = Switch[       fetchURL
   , Automatic             , exportDir
   , "Relative"            , FileNameTake @ exportDir  (*img/*)
   , _String | _URL | _File, fetchURL
@@ -564,11 +566,14 @@ BoxesToTeXString[boxes_] := Check[
 
 
 (*InputText is nice but has a fixed page width...*)
-
-BoxesToInputString[ boxData_]:=  Module[
+BoxesToInputString[ Cell[data_, a___, CellLabel->_,b___] ]:=BoxesToInputString[ Cell[data,a,b]]
+BoxesToInputString[ Cell[programData_String, ___] ]:=  programData;
+BoxesToInputString[ programData_String] := programData
+BoxesToInputString[ boxes_]:= BoxesToInputString[ BoxData @ boxes]
+BoxesToInputString[ boxes_BoxData]:=  Module[
   {tagged, mark = "ORYGINALMARK", iNL = FromCharacterCode@{62371}}
   ,
-  tagged = boxData /. (n : "\n" | iNL) :> mark <> n;
+  tagged = boxes /. (n : "\n" | iNL) :> mark <> n;
   tagged = First @ FrontEndExecute @  FrontEnd`ExportPacket[tagged, "InputText"];
 
   StringReplace[
