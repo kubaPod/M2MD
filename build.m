@@ -27,18 +27,21 @@ buildMainPalette[]:=Module[{nb, deployDir}
     , FileNameJoin[{deployDir, $projectName <> ".nb"}]
   ]
   ; NotebookClose[nb]
-]
+];
 
 mainPalette[]:= CreatePalette[
-  
-  DynamicModule[{processing = False}
+  DynamicModule[{processing = False, path = None}
     , With[{
     progressBar = ProgressIndicator[Appearance -> "Indeterminate"]
     , button = Button[
       "Convert Notebook to Markdown"
       , processing = True
       ; Needs["M2MD`"]
-      ; CreateDocument[ Cell[ M2MD @ InputNotebook[], "Program" ] ]
+      ; path = If[!StringQ[path], $HomeDirectory, path]
+      ; path = SystemDialogInput["FileSave", {path, {"Markdown files"->{"*.md"},"Text files"->{"*.md","*.txt"},"All files"->{"*"}}}]
+      ; If[path != $Canceled,
+          SetDirectory@DirectoryName[path]
+        ; MDExport[path,InputNotebook[]]]
       ; processing = False
       , Method -> "Queued"
       , FrameMargins -> 15
