@@ -79,12 +79,12 @@ MDExport // Options = {
 MDExport[path_String , obj_, patt : OptionsPattern[]]:=
 Export[
   path
-, M2MD[obj
+, AddFrontMatter[M2MD[obj
   , patt (*will overwrite that path if needed*)
   , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
   , "ImagesFetchURL"  -> "Relative"
   
-  ] // AddFrontMatter[#,"FrontMatter" /. patt] &
+  ], Lookup[Options[MDExport],"FrontMatter"] ]
 , "Text"
 , CharacterEncoding -> "UTF8"
 ]
@@ -291,7 +291,7 @@ BoxesToMDString[boxes_, inlineCell_:True, opt : OptionsPattern[]]:= parseData[bo
 
 
 AddFrontMatter[markdownString_String,frontMatter_Association:<||>]:=Module[{frontMatterString,resultString},
-If[AssociationQ[frontMatter]&& Length[frontMatter] != 0,
+If[AssociationQ[frontMatter] && Length[frontMatter] != 0,
 (*Convert the nested association to JSON format*)
 frontMatterJSON=ExportString[frontMatter,"JSON"];
 (*Create the front matter string with "---" delimiters*)
@@ -300,6 +300,7 @@ frontMatterString=StringJoin["\n",frontMatterJSON,"\n\n"];
 resultString=StringJoin[frontMatterString,markdownString];
 (*Return the result*)
 resultString,
+(*Return plain markdown string *)
 markdownString]
 ]
 
