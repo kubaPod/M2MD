@@ -71,7 +71,8 @@ MDExport // Options = {
       
   "BoxesToStringType" -> $BoxesToStringType, (*whatever ExportPacket supports*)  
   
-  "MDElementTemplates"-> Automatic (* _String | template_ *)
+  "MDElementTemplates"-> Automatic, (* _String | template_ *)
+  "FrontMatter" -> <||>
 }
 
 
@@ -83,7 +84,7 @@ Export[
   , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
   , "ImagesFetchURL"  -> "Relative"
   
-  ] 
+  ] // AddFrontMatter[#,"FrontMatter" /. patt] &
 , "Text"
 , CharacterEncoding -> "UTF8"
 ]
@@ -109,7 +110,7 @@ MDEnvironment[___, OptionsPattern[] ]:= Function[
 ]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*LoadDefinitions*)
 
 
@@ -194,7 +195,7 @@ M2MD[ cell : Cell[_, style_, ___], opt : OptionsPattern[] ] := M2MD[style, cell,
 (*Convertions*)
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*style rules*)
 
 
@@ -254,7 +255,7 @@ ItemStyleQ      = StringContainsQ["item", IgnoreCase -> True]
 ItemLevel = StringCount[#, "sub", IgnoreCase -> True]&
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*content rules*)
 
 
@@ -285,7 +286,25 @@ BoxesToMDString[boxes_, inlineCell_:True, opt : OptionsPattern[]]:= parseData[bo
 
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
+(*AddFrontMatter*)
+
+
+AddFrontMatter[markdownString_String,frontMatter_Association:<||>]:=Module[{frontMatterString,resultString},
+If[AssociationQ[frontMatter]&& Length[frontMatter] != 0,
+(*Convert the nested association to JSON format*)
+frontMatterJSON=ExportString[frontMatter,"JSON"];
+(*Create the front matter string with "---" delimiters*)
+frontMatterString=StringJoin["\n",frontMatterJSON,"\n\n"];
+(*Append the front matter to the input string*)
+resultString=StringJoin[frontMatterString,markdownString];
+(*Return the result*)
+resultString,
+markdownString]
+]
+
+
+(* ::Section:: *)
 (*ToImageElement*)
 
 
@@ -430,7 +449,7 @@ parseData[ TemplateBox[{lbl_, ref_}, "RefLink"|"RefLinkPlain"|"StringTypeLink", 
 ]:= MDElement["Hyperlink", lbl, "https://reference.wolfram.com/language/" <> StringTrim[ref, "paclet:"]]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*defaults*)
 
 
@@ -505,7 +524,7 @@ MDElement[args___]:= ( Message[MDElement::unknownTag, args]; "");
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*loading*)
 
 
