@@ -22,6 +22,56 @@ VerificationTest[  M2MD @ "string", "string", TestID -> "String"]
 
 
 (* ::Subsection:: *)
+(*FrontMatter*)
+
+
+
+path = CreateFile[];
+testExport = Import[
+MDExport[path, Cell["Test", "Title"],##],"String"]&;
+
+
+VerificationTest[
+  testExport["FrontMatter" -> <||>]
+, "# Test"
+, TestID -> "front matter: empty -> none"
+]
+
+
+VerificationTest[
+  testExport[]
+, "# Test"
+, TestID -> "no front matter"
+]
+
+
+VerificationTest[
+  testExport["FrontMatter" -> <|"title"->"CODE"|>]
+, "{\r\n\t\"title\":\"CODE\"\r\n}\r\n# Test"
+, TestID -> "simple json front matter"
+]
+
+
+VerificationTest[
+  testExport["FrontMatter" -> $Failed]
+, "# Test"
+, {MDExport::fmerr}
+, TestID -> "unknown front matter"
+]
+
+
+VerificationTest[
+  testExport["FrontMatter" -> "---\ntitle: The Title\n---\n"]
+, "---\r\ntitle: The Title\r\n---\r\n\r\n# Test"
+, TestID -> "custom front matter string"
+]
+
+
+DeleteFile @ path;
+Remove @ path;
+
+
+(* ::Subsection:: *)
 (*Image*)
 
 

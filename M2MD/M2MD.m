@@ -33,6 +33,7 @@ ClearAll["`*", "`*`*"]
 M2MD::usage = "M2MD[obj] converts object to markdown string";
 
 MDExport::usage = "MDExport[\"path/to.md\", obj]"
+MDExport::fmerr = "Skipping an unknown front matter format."
 
 WithLineBreaks::usage = "WithLineBreaks[string] is a helper function that prepends double space to new lines, md parsers consider is a line break."
 
@@ -71,21 +72,30 @@ MDExport // Options = {
       
   "BoxesToStringType" -> $BoxesToStringType, (*whatever ExportPacket supports*)  
   
-  "MDElementTemplates"-> Automatic (* _String | template_ *)
+  "MDElementTemplates"-> Automatic, (* _String | template_ *)
+  "FrontMatter"       -> <||> (* _Association for JSON flavor or _String for user provided YAML or TOML string*)
 }
 
 
-MDExport[path_String , obj_, patt : OptionsPattern[]]:=
-Export[
-  path
-, M2MD[obj
-  , patt (*will overwrite that path if needed*)
-  , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
-  , "ImagesFetchURL"  -> "Relative"
+MDExport[path_String , obj_, patt : OptionsPattern[]]:= Module[{mdString, options}
+, mdString = Check[
+    M2MD[
+      obj
+    , patt (*will overwrite that path if needed*)
+    , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
+    , "ImagesFetchURL"  -> "Relative"  
+    ]
+  , Return[ $Failed, Module]
+  ]  
+; options = <|Options @ MDExport, patt|>
+; mdString = AddFrontMatter[mdString, Lookup[options, "FrontMatter"] ]
   
-  ] 
-, "Text"
-, CharacterEncoding -> "UTF8"
+; Export[
+    path
+  , mdString
+  , "Text"
+  , CharacterEncoding -> "UTF8"
+  ]
 ]
 
 
@@ -109,7 +119,7 @@ MDEnvironment[___, OptionsPattern[] ]:= Function[
 ]
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
 (*LoadDefinitions*)
 
 
@@ -133,11 +143,11 @@ ToDownValue[ rule_[ rhs:Except[_HoldPattern] , lhs_] ] := HoldPattern[rhs] :> lh
 ToDownValue[ r_Rule ] := RuleDelayed @@ r
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*M2MD (whatever to MD)*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*sugar*)
 
 
@@ -254,7 +264,7 @@ ItemStyleQ      = StringContainsQ["item", IgnoreCase -> True]
 ItemLevel = StringCount[#, "sub", IgnoreCase -> True]&
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*content rules*)
 
 
@@ -285,7 +295,30 @@ BoxesToMDString[boxes_, inlineCell_:True, opt : OptionsPattern[]]:= parseData[bo
 
 
 
-(* ::Section::Closed:: *)
+(* ::Section:: *)
+(*AddFrontMatter*)
+
+
+AddFrontMatter[ md_String, fm_String]:= fm <> "\n" <> md
+
+AddFrontMatter[ md_String, fm_Association ]:= Module[{ fmString } 
+, If[
+    Length @ fm == 0
+  , Return[ md, Module]
+  ]
+; fmString = Check[
+    ExportString[ fm, "RawJSON" ]
+  , Return[ md, Module] 
+  ]  
+
+; AddFrontMatter[ md, fmString ]
+]
+
+AddFrontMatter[ md_, else_]:= (Message[MDExport::fmerr]; md)
+
+
+
+(* ::Section:: *)
 (*ToImageElement*)
 
 
@@ -430,7 +463,7 @@ parseData[ TemplateBox[{lbl_, ref_}, "RefLink"|"RefLinkPlain"|"StringTypeLink", 
 ]:= MDElement["Hyperlink", lbl, "https://reference.wolfram.com/language/" <> StringTrim[ref, "paclet:"]]
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*defaults*)
 
 
@@ -505,7 +538,7 @@ MDElement[args___]:= ( Message[MDElement::unknownTag, args]; "");
 
 
 
-(* ::Subsection::Closed:: *)
+(* ::Subsection:: *)
 (*loading*)
 
 
