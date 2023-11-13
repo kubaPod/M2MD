@@ -33,6 +33,7 @@ ClearAll["`*", "`*`*"]
 M2MD::usage = "M2MD[obj] converts object to markdown string";
 
 MDExport::usage = "MDExport[\"path/to.md\", obj]"
+MDExport::fmerr = "Skipping an unknown front matter format."
 
 WithLineBreaks::usage = "WithLineBreaks[string] is a helper function that prepends double space to new lines, md parsers consider is a line break."
 
@@ -72,21 +73,29 @@ MDExport // Options = {
   "BoxesToStringType" -> $BoxesToStringType, (*whatever ExportPacket supports*)  
   
   "MDElementTemplates"-> Automatic, (* _String | template_ *)
-  "FrontMatter" -> <||>
+  "FrontMatter"       -> <||> (* _Association for JSON flavor or _String for user provided YAML or TOML string*)
 }
 
 
-MDExport[path_String , obj_, patt : OptionsPattern[]]:=
-Export[
-  path
-, AddFrontMatter[M2MD[obj
-  , patt (*will overwrite that path if needed*)
-  , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
-  , "ImagesFetchURL"  -> "Relative"
+MDExport[path_String , obj_, patt : OptionsPattern[]]:= Module[{mdString, options}
+, mdString = Check[
+    M2MD[
+      obj
+    , patt (*will overwrite that path if needed*)
+    , "ImagesExportURL" -> FileNameJoin[{FileNameDrop @ ExpandFileName @ path, "img"}]
+    , "ImagesFetchURL"  -> "Relative"  
+    ]
+  , Return[ $Failed, Module]
+  ]  
+; options = <|Options @ MDExport, patt|>
+; mdString = AddFrontMatter[mdString, Lookup[options, "FrontMatter"] ]
   
-  ], Lookup[patt,"FrontMatter"] ]
-, "Text"
-, CharacterEncoding -> "UTF8"
+; Export[
+    path
+  , mdString
+  , "Text"
+  , CharacterEncoding -> "UTF8"
+  ]
 ]
 
 
@@ -134,11 +143,11 @@ ToDownValue[ rule_[ rhs:Except[_HoldPattern] , lhs_] ] := HoldPattern[rhs] :> lh
 ToDownValue[ r_Rule ] := RuleDelayed @@ r
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*M2MD (whatever to MD)*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*sugar*)
 
 
@@ -195,7 +204,7 @@ M2MD[ cell : Cell[_, style_, ___], opt : OptionsPattern[] ] := M2MD[style, cell,
 (*Convertions*)
 
 
-(* ::Subsection:: *)
+(* ::Subsection::Closed:: *)
 (*style rules*)
 
 
@@ -290,19 +299,23 @@ BoxesToMDString[boxes_, inlineCell_:True, opt : OptionsPattern[]]:= parseData[bo
 (*AddFrontMatter*)
 
 
-AddFrontMatter[markdownString_String,frontMatter_Association:<||>]:=Module[{frontMatterString,resultString},
-If[AssociationQ[frontMatter] && Length[frontMatter] != 0,
-(*Convert the nested association to JSON format*)
-frontMatterJSON=ExportString[frontMatter,"JSON"];
-(*Create the front matter string with "---" delimiters*)
-frontMatterString=StringJoin["\n",frontMatterJSON,"\n\n"];
-(*Append the front matter to the input string*)
-resultString=StringJoin[frontMatterString,markdownString];
-(*Return the result*)
-resultString,
-(*Return plain markdown string *)
-markdownString]
+AddFrontMatter[ md_String, fm_String]:= fm <> "\n" <> md
+
+AddFrontMatter[ md_String, fm_Association ]:= Module[{ fmString } 
+, If[
+    Length @ fm == 0
+  , Return[ md, Module]
+  ]
+; fmString = Check[
+    ExportString[ fm, "RawJSON" ]
+  , Return[ md, Module] 
+  ]  
+
+; AddFrontMatter[ md, fmString ]
 ]
+
+AddFrontMatter[ md_, else_]:= (Message[MDExport::fmerr]; md)
+
 
 
 (* ::Section:: *)
